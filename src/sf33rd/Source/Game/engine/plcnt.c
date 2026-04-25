@@ -240,7 +240,7 @@ const SA_DATA super_arts_data[20][4] = { { { 20, 24, 25, 0, 0, 0, 0, 3, 128, 1, 
                                            { 0, 0, 0, 0, 0, 0, 0, 0, 64, 1, 65536 } },
                                          { { 20, 0, 0, 0, 0, 0, 0, 0, 104, 2, 65536 },
                                            { 22, 0, 0, 0, 0, 0, 0, 0, 120, 2, 65536 },
-                                           { 21, 0, 0, 0, 0, 0, 0, 0, 80, 1, 65536 },
+                                           { 21, 0, 0, 0, 0, 0, 0, 0, 60, 4, 65536 },
                                            { 0, 0, 0, 0, 0, 0, 0, 0, 64, 1, 65536 } } };
 
 const SA_DATA super_arts_DATA[20][4] = { { { 20, 24, 25, 0, 0, 0, 0, 3, 120, 2, 65536 },
@@ -1429,13 +1429,13 @@ void set_kizetsu_status(s16 ix) {
     piyori_type[ix].recover = pl_nr_piyo_tbl[plnum];
     piyori_type[ix].genkai = pl_piyo_tbl[plnum] + stun_gauge_len_omake[omop_stun_gauge_len[ix]];
 
-    if (piyori_type[ix].genkai < 56) {
+    /*if (piyori_type[ix].genkai < 56) {
         piyori_type[ix].genkai = 56;
     }
 
     if (piyori_type[ix].genkai > 72) {
         piyori_type[ix].genkai = 72;
-    }
+    }*/
 }
 
 void clear_kizetsu_point(PLW* wk) { // 🟢

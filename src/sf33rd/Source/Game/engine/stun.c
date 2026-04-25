@@ -38,13 +38,13 @@ void stngauge_cont_main() {
     u8 i;
 
     if (omop_cockpit != 0) {
-        if (gauge_stop_flag[0] == 0) {
+        if (gauge_stop_flag[0] == 0) {//p1
             stngauge_control(0);
         } else {
             stun_put(0, sdat->cstn);
         }
 
-        if (gauge_stop_flag[1] == 0) {
+        if (gauge_stop_flag[1] == 0) {//p2
             stngauge_control(1);
         } else {
             stun_put(1, sdat[1].cstn);
