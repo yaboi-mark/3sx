@@ -59,7 +59,7 @@ void Init_Task_1st(struct _TASK* task_ptr) {
     Bg_TexInit();
     Scrscreen_Init();
     effect_work_init();
-    Max_vitality = 160;
+    Max_vitality = 200;
     reset_NG_flag = 0;
     Break_Into = 0;
     Forbid_Break = 0;

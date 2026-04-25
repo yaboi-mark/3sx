@@ -523,7 +523,7 @@ void Normal_18000(PLW* wk) {
         set_char_move_init(&wk->wu, 0, jpdat_tbl[wk->wu.routine_no[2] - 18][0]);
         setup_mvxy_data(&wk->wu, jpdat_tbl[wk->wu.routine_no[2] - 18][1]);
         add_mvxy_speed(&wk->wu);
-        wk->air_jump_ok_time = 4;
+        wk->air_jump_ok_time = 1;
         wk->bs2_on_car = 0;
         break;
 
@@ -975,7 +975,7 @@ void Normal_52000(PLW* wk) {
     switch (wk->wu.routine_no[3]) {
     case 0:
         wk->wu.routine_no[3]++;
-        wk->extra_jump = 1;
+        wk->extra_jump += 1;
         remake_sankaku_tobi_mvxy(&wk->wu, wk->micchaku_flag);
         set_char_move_init(&wk->wu, 0, 48);
         effect_I3_init(&wk->wu, 0);
@@ -1004,7 +1004,7 @@ void Normal_53000(PLW* wk) {
     switch (wk->wu.routine_no[3]) {
     case 0:
         wk->wu.routine_no[3]++;
-        wk->extra_jump = 1;
+        wk->extra_jump += 1;
         set_char_move_init(&wk->wu, 0, 49);
         break;
 
@@ -1076,7 +1076,7 @@ void Normal_55000(PLW* wk) {
     switch (wk->wu.routine_no[3]) {
     case 0:
         wk->wu.routine_no[3]++;
-        wk->extra_jump = 1;
+        wk->extra_jump += 1;
         set_char_move_init(&wk->wu, 0, 18);
         setup_mvxy_data(&wk->wu, 7);
         make_nm55_init_sp(wk);

@@ -5,6 +5,7 @@
 
 #include "sf33rd/Source/Game/engine/vital.h"
 #include "common.h"
+#include "xrd_common.h"
 #include "sf33rd/Source/Game/engine/plcnt.h"
 #include "sf33rd/Source/Game/engine/slowf.h"
 #include "sf33rd/Source/Game/engine/workuser.h"
@@ -18,9 +19,9 @@ void vital_cont_init() {
     u8 i;
 
     for (i = 0; i < 2; i++) {
-        vit[i].cyerw = 160;
-        vit[i].cred = 160;
-        vit[i].ored = 160;
+        vit[i].cyerw = XRD_MAX_VITALITY;
+        vit[i].cred = XRD_MAX_VITALITY;
+        vit[i].ored = XRD_MAX_VITALITY;
         vit[i].colnum = 1;
         gauge_stop_flag[i] = 0;
         vital_stop_flag[i] = 0;
@@ -45,28 +46,37 @@ void vital_cont_main() {
 }
 
 void vital_control(u8 pl) {
-    if (plw[pl].wu.vital_new < 161) {
-        if ((vit[pl].cyerw == plw[pl].wu.vital_new) && (vit[pl].cred == plw[pl].wu.vital_new) &&
-            (vit[pl].ored != (plw[pl].wu.vital_new + 1))) {
+	s16 substitute_health = plw[pl].wu.vital_new;
+	if (XRD_MAX_VITALITY > 160) {
+		substitute_health *= 160;
+		substitute_health /= XRD_MAX_VITALITY;
+	}
+	else if (XRD_MAX_VITALITY < 160) {
+		substitute_health *= XRD_MAX_VITALITY;
+		substitute_health /= 160;
+	}
+    if (substitute_health < 161) {
+        if ((vit[pl].cyerw == substitute_health) && (vit[pl].cred == substitute_health) &&
+            (vit[pl].ored != (substitute_health + 1))) {
             if (No_Trans == 0) {
                 vital_parts_allwrite(pl);
             }
             return;
         }
 
-        if (vit[pl].cred < plw[pl].wu.vital_new) {
-            vit[pl].cred = plw[pl].wu.vital_new;
+        if (vit[pl].cred < substitute_health) {
+            vit[pl].cred = substitute_health;
         }
 
-        vit[pl].cyerw = plw[pl].wu.vital_new;
+        vit[pl].cyerw = substitute_health;
 
-        if (plw[pl].wu.vital_new < 0) {
+        if (substitute_health < 0) {
             vit[pl].cyerw = 0;
         }
 
-        if (plw[pl].wu.vital_new == 160) {
+        if (substitute_health == 160) {
             vit[pl].colnum = 1;
-        } else if (plw[pl].wu.vital_new < 49) {
+        } else if (substitute_health < 49) {
             vit[pl].colnum = 3;
         } else {
             vit[pl].colnum = 2;
@@ -79,8 +89,8 @@ void vital_control(u8 pl) {
         vit[pl].ored = vit[pl].cred;
         vit[pl].cred--;
 
-        if (vit[pl].cred < plw[pl].wu.vital_new) {
-            vit[pl].cred = plw[pl].wu.vital_new;
+        if (vit[pl].cred < substitute_health) {
+            vit[pl].cred = substitute_health;
         }
     }
 }

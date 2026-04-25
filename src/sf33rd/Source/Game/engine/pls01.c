@@ -211,7 +211,7 @@ s32 check_air_jump(PLW* wk) { // 🟢
         return 0;
     }
 
-    if (wk->extra_jump) {
+    if (wk->extra_jump > 1) {
         return 0;
     }
 
@@ -223,9 +223,9 @@ s32 check_air_jump(PLW* wk) { // 🟢
         return 0;
     }
 
-    if (wk->wu.position_y < 48) {
-        return 0;
-    }
+    //if (wk->wu.position_y < 48) {
+    //    return 0;
+    //}
 
     if (!(wk->cp->sw_now & 1)) {
         return 0;
@@ -234,7 +234,6 @@ s32 check_air_jump(PLW* wk) { // 🟢
     wk->wu.routine_no[1] = 0;
     wk->wu.routine_no[2] = 53;
     wk->wu.routine_no[3] = 0;
-    wk->jpdir = 0;
     grade_add_command_waza(wk->wu.id);
     return 1;
 }
@@ -244,7 +243,7 @@ s32 check_sankaku_tobi(PLW* wk) { // 🟢
         return 0;
     }
 
-    if (wk->extra_jump) {
+    if (wk->extra_jump > 1) {
         return 0;
     }
 
@@ -274,7 +273,7 @@ void check_extra_jump_timer(PLW* wk) { // 🟡
         wk->air_jump_ok_time--;
     }
 
-    if (wk->wu.xyz[1].disp.pos > 48 && wk->micchaku_flag) {
+    if (wk->micchaku_flag) {
         if (!ArcadeBalance_IsEnabled()) {
             if (wk->wu.routine_no[1] == 1) {
                 wk->micchaku_wall_time = 0;

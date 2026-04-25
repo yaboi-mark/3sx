@@ -35,22 +35,22 @@ const u32 omop_guard_type[4] = { DIP_AUTO_GUARD_DISABLED | DIP_AUTO_PARRY_DISABL
                                  DIP_AUTO_GUARD_DISABLED | DIP_AUTO_PARRY_DISABLED,
                                  DIP_AUTO_GUARD_DISABLED | DIP_SEMI_AUTO_PARRY_DISABLED };
 
-const u32 sysdir_base_move[20] = { (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), DIP_WALL_JUMP_DISABLED,
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), DIP_AIR_JUMP_DISABLED,
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED),
-                                   (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED), (DIP_WALL_JUMP_DISABLED | DIP_AIR_JUMP_DISABLED) };
+const u32 sysdir_base_move[20] = { DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, 0,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED,
+                                   DIP_WALL_JUMP_DISABLED, DIP_WALL_JUMP_DISABLED };
 
-const s16 use_ex_gauge[4] = { 0, 20, 40, 60 };
+const s16 use_ex_gauge[4] = { -20, 0, 20, 40 };
 
 const s16 guard_distance[4] = { 48, 112, 256, 512 };
 
-const s16 sa_gauge_omake[4] = { 0, 24, 32, 44 };
+const s16 sa_gauge_omake[4] = { 24, 48, 56, 68 };
 
 const s16 stun_gauge_omake[4] = { 0, 24, 32, 44 };
 
@@ -58,9 +58,9 @@ const s16 stun_gauge_r_omake[4] = { 0, 20, 32, 44 };
 
 const s16 stun_gauge_len_omake[5] = { -16, -8, 0, 8, 16 };
 
-const s16 blok_b_omake[4] = { -2, 0, 2, 4 };
+const s16 blok_b_omake[4] = { 0, 4, 8, 12 };
 
-const s16 blok_r_omake[4] = { -1, 0, 1, 2 };
+const s16 blok_r_omake[4] = { 0, 1, 2, 3 };
 
 const s16 sag_stock_omake[11] = { -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
@@ -212,13 +212,13 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
 
     omop_guard_distance_ix[0] = sysdir_data->contents[1][2];
 
-    if (sysdir_data->contents[1][3] != 0) {
+    //if (sysdir_data->contents[1][3] != 0) {
         omop_spmv_ng_table[0] |= DIP_CHIP_DAMAGE_ENABLED;
-    }
+    //}
 
-    if (sysdir_data->contents[1][4] == 0) {
+    //if (sysdir_data->contents[1][4] == 0) {
         omop_spmv_ng_table2[0] |= DIP2_CHIP_DAMAGE_KO_DISABLED;
-    }
+    //}
 
     if (save_w[Present_Mode].GuardCheck) {
         omop_spmv_ng_table[0] |= DIP_NEW_GUARD_JUDGMENT_ENABLED;
@@ -252,9 +252,9 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
         omop_spmv_ng_table2[0] |= DIP2_THROW_BREAK_DISABLED;
     }
 
-    if (sysdir_data->contents[3][2] != 0) {
+    //if (sysdir_data->contents[3][2] != 0) {
         omop_spmv_ng_table2[0] |= DIP2_THROW_BREAK_LOCKOUT_ENABLED;
-    }
+    //}
 
     if (sysdir_data->contents[4][0] == 0) {
         omop_spmv_ng_table2[0] |= DIP2_UNIVERSAL_OVERHEAD_DISABLED;
@@ -273,33 +273,33 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
     }
 
     if (sysdir_data->contents[5][0] == 0) { // Super arts disabled
-        omop_spmv_ng_table[0] |= (DIP_UNKNOWN_30 | DIP_UNKNOWN_31);
+        //omop_spmv_ng_table[0] |= (DIP_UNKNOWN_30 | DIP_UNKNOWN_31);
     }
 
     if (sysdir_data->contents[5][1] == 0) { // Special moves disabled
-        omop_spmv_ng_table[0] |= (DIP_GROUND_SPECIALS_DISABLED | DIP_AIR_SPECIALS_DISABLED);
+        //omop_spmv_ng_table[0] |= (DIP_GROUND_SPECIALS_DISABLED | DIP_AIR_SPECIALS_DISABLED);
     }
 
     if (sysdir_data->contents[5][2] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_EX_MOVE_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_EX_MOVE_DISABLED;
     }
 
     omop_use_ex_gauge_ix[0] = sysdir_data->contents[5][3];
 
     if (sysdir_data->contents[6][0] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_TARGET_COMBO_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_TARGET_COMBO_DISABLED;
     }
 
     if (sysdir_data->contents[6][1] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_SPECIAL_MOVE_SUPER_ART_CANCEL_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_SPECIAL_MOVE_SUPER_ART_CANCEL_DISABLED;
     }
 
     if (sysdir_data->contents[6][2] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_SUPER_ART_CANCEL_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_SUPER_ART_CANCEL_DISABLED;
     }
 
     if (sysdir_data->contents[6][3] == 0) {
-        omop_spmv_ng_table[0] |= DIP_HIGH_JUMP_CANCEL_DISABLED;
+        //omop_spmv_ng_table[0] |= DIP_HIGH_JUMP_CANCEL_DISABLED;
     }
 
     if (sysdir_data->contents[6][4] == 1) {
@@ -307,19 +307,19 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
     }
 
     if (sysdir_data->contents[7][0] == 0) {
-        omop_spmv_ng_table[0] |= DIP_AIR_GUARD_DISABLED;
+        //omop_spmv_ng_table[0] |= DIP_AIR_GUARD_DISABLED;
     }
 
     if (sysdir_data->contents[7][1] == 0) {
-        omop_spmv_ng_table[0] |= DIP_AUTO_AIR_RECOVERY_DISABLED;
+        //omop_spmv_ng_table[0] |= DIP_AUTO_AIR_RECOVERY_DISABLED;
     }
 
-    if (sysdir_data->contents[7][2] == 0) {
+    //if (sysdir_data->contents[7][2] == 0) {
         omop_spmv_ng_table[0] |= DIP_AIR_KNOCKDOWNS_DISABLED;
-    }
+    //}
 
     if (sysdir_data->contents[7][3] == 0) {
-        omop_spmv_ng_table[0] |= DIP_EXTREME_CHIP_DAMAGE_DISABLED;
+        //omop_spmv_ng_table[0] |= DIP_EXTREME_CHIP_DAMAGE_DISABLED;
     }
 
     if (sysdir_data->contents[7][4] == 0) {
@@ -331,36 +331,36 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
     }
 
     if (sysdir_data->contents[8][0] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_GROUND_CHAIN_COMBO_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_GROUND_CHAIN_COMBO_DISABLED;
     }
 
     if (sysdir_data->contents[8][1] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_AIR_CHAIN_COMBO_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_AIR_CHAIN_COMBO_DISABLED;
     }
 
     if (sysdir_data->contents[8][2] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_ALL_NORMALS_CANCELLABLE_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_ALL_NORMALS_CANCELLABLE_DISABLED;
     }
 
     if (sysdir_data->contents[8][3] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_ALL_MOVES_CANCELLABLE_BY_HIGH_JUMP_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_ALL_MOVES_CANCELLABLE_BY_HIGH_JUMP_DISABLED;
     }
 
     if (sysdir_data->contents[8][4] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_ALL_MOVES_CANCELLABLE_BY_DASH_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_ALL_MOVES_CANCELLABLE_BY_DASH_DISABLED;
     }
 
     if (sysdir_data->contents[8][5] == 0) {
-        omop_spmv_ng_table2[0] |= DIP2_SPECIAL_TO_SPECIAL_CANCEL_DISABLED;
+        //omop_spmv_ng_table2[0] |= DIP2_SPECIAL_TO_SPECIAL_CANCEL_DISABLED;
     }
 
     if (sysdir_data->contents[9][0] == 0) {
         omop_spmv_ng_table[0] |= DIP2_ALL_SUPER_ARTS_AVAILABLE_DISABLED;
     }
 
-    if (sysdir_data->contents[9][1] == 0) {
+    //if (sysdir_data->contents[9][1] == 0) {
         omop_spmv_ng_table2[0] |= DIP2_SA_TO_SA_CANCEL_DISABLED;
-    }
+    //}
 
     omop_otedama_ix[0] = sysdir_data->contents[9][2];
 

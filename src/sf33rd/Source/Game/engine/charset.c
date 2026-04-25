@@ -2546,6 +2546,14 @@ void check_cgd_patdat(WORK* wk) {
                 break;
 
             case 2:
+                if (!(WK_AS_PLW->spmv_ng_flag2 & DIP2_ALL_MOVES_CANCELLABLE_BY_HIGH_JUMP_DISABLED)) {
+                    wk->cg_cancel |= 1;
+                }
+
+                if (!(WK_AS_PLW->spmv_ng_flag2 & DIP2_ALL_MOVES_CANCELLABLE_BY_DASH_DISABLED)) {
+                    wk->cg_cancel |= 2;
+                }
+				
                 if (!(WK_AS_PLW->spmv_ng_flag2 & DIP2_AIR_CHAIN_COMBO_DISABLED) && !hikusugi_check(wk)) {
                     if (WK_AS_PLW->player_number == 7) {
                         wk->cg_meoshi = chain_hidou_nm_air_table[wk->kow & 7];

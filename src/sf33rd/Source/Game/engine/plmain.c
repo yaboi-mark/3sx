@@ -5,6 +5,7 @@
 
 #include "sf33rd/Source/Game/engine/plmain.h"
 #include "common.h"
+#include "xrd_common.h"
 #include "constants.h"
 #include "sf33rd/Source/Game/animation/appear.h"
 #include "sf33rd/Source/Game/com/com_pl.h"
@@ -1221,8 +1222,8 @@ void check_omop_vital(PLW* wk) { // 🔴
 
         wk->wu.vital_new++;
 
-        if (wk->wu.vital_new > 160) {
-            wk->wu.vital_new = 160;
+        if (wk->wu.vital_new > XRD_MAX_VITALITY) {
+            wk->wu.vital_new = XRD_MAX_VITALITY;
             break;
         }
 
@@ -1247,8 +1248,8 @@ void check_omop_vital(PLW* wk) { // 🔴
     case 4:
         wk->wu.vital_new++;
 
-        if (wk->wu.vital_new > 160) {
-            wk->wu.vital_new = 160;
+        if (wk->wu.vital_new > XRD_MAX_VITALITY) {
+            wk->wu.vital_new = XRD_MAX_VITALITY;
         }
 
         break;

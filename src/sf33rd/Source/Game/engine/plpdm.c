@@ -1370,7 +1370,7 @@ void set_dm_hos_flag_sky(PLW* wk) {
             if (disx > 96) {
                 return;
             }
-        } else if (disx > 160) {
+        } else if (disx > 200) {
             return;
         }
 
