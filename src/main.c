@@ -108,7 +108,10 @@ void Main_Init() {
     palCreateGhost();
     ppgMakeConvTableTexDC();
     appSetupBasePriority();
+
+#if !MEMCARD_DISABLED
     MemcardInit();
+#endif
 }
 
 // Iteration
@@ -282,9 +285,7 @@ void Main_StepFrame() {
     mpp_w.inGame = false;
 
     njUserMain();
-    seqsBeforeProcess();
     njdp2d_draw();
-    seqsAfterProcess();
     KnjFlush();
     disp_effect_work();
     flFlip(0);

@@ -2,24 +2,36 @@
 
 #include "platform/app/sdl/sdl_app.h"
 #include "arcade/arcade_balance.h"
+#include "args.h"
 #include "common.h"
-#include "imgui/imgui_wrapper.h"
 #include "main.h"
+#include "platform/video/sdl_generic/sdl_generic_renderer.h"
 #include "port/config/config.h"
 #include "port/config/keymap.h"
-#include "port/host_context.h"
-#include "port/input_backend.h"
-#include "port/render_backend.h"
-#include "port/sdl/netplay_screen.h"
-#include "port/sdl/netstats_renderer.h"
-#include "port/sdl/scanline_renderer.h"
 #include "port/sdl/sdl_debug_text.h"
 #include "port/sdl/sdl_message_renderer.h"
 #include "port/sound/adx.h"
 #include "sf33rd/AcrSDK/ps2/foundaps2.h"
 
+#if CRS_INPUT_DRIVER_SDL
+#include "platform/input/sdl/sdl_pad.h"
+#endif
+
+#if NETPLAY_ENABLED
+#include "port/sdl/netplay_screen.h"
+#include "port/sdl/netstats_renderer.h"
+#endif
+
 #if DEBUG
 #include "sf33rd/Source/Game/debug/debug_config.h"
+#endif
+
+#if DEBUG && IMGUI
+#include "imgui/imgui_wrapper.h"
+#endif
+
+#if STATCHECK
+#include "test/test_runner.h"
 #endif
 
 #include "port/io/afs.h"
@@ -28,17 +40,14 @@
 #include <SDL3/SDL.h>
 
 #if _WIN32 && DEBUG
-// Including windows.h causes conflicts with the Polygon struct, so I just included the header where
-// AllocConsole is and the Windows-specific typedefs that it requires.
 #include <windef.h>
 
 #include <ConsoleApi.h>
+#include <stdio.h>
 #endif
 
 typedef enum ScaleMode {
     SCALEMODE_NEAREST,
-    SCALEMODE_LINEAR,
-    SCALEMODE_SOFT_LINEAR,
     SCALEMODE_SQUARE_PIXELS,
     SCALEMODE_INTEGER,
 } ScaleMode;
@@ -57,11 +66,8 @@ static const int window_min_width = 384;
 static const int window_min_height = (int)(window_min_width / display_target_ratio);
 static const Uint64 target_frame_time_ns = 1000000000.0 / TARGET_FPS;
 
-SDL_Window* window = NULL;
-static SDL_Renderer* renderer = NULL;
-static PlatformHostContext host_context = { 0 };
-static SDL_Texture* screen_texture = NULL;
-static ScaleMode scale_mode = SCALEMODE_SOFT_LINEAR;
+static SDL_Window* window = NULL;
+static ScaleMode scale_mode = SCALEMODE_NEAREST;
 
 static Uint64 frame_deadline = 0;
 static FrameMetrics frame_metrics = { 0 };
@@ -69,44 +75,6 @@ static Uint64 last_frame_end_time = 0;
 
 static Uint64 last_mouse_motion_time = 0;
 static const int mouse_hide_delay_ms = 2000; // 2 seconds
-
-static SDL_ScaleMode screen_texture_scale_mode() {
-    switch (scale_mode) {
-    case SCALEMODE_LINEAR:
-    case SCALEMODE_SOFT_LINEAR:
-        return SDL_SCALEMODE_LINEAR;
-
-    case SCALEMODE_NEAREST:
-    case SCALEMODE_SQUARE_PIXELS:
-    case SCALEMODE_INTEGER:
-        return SDL_SCALEMODE_NEAREST;
-
-    default:
-        return SDL_SCALEMODE_INVALID;
-    }
-}
-
-static SDL_Point screen_texture_size() {
-    SDL_Point size;
-    SDL_GetRenderOutputSize(renderer, &size.x, &size.y);
-
-    if (scale_mode == SCALEMODE_SOFT_LINEAR) {
-        size.x *= 2;
-        size.y *= 2;
-    }
-
-    return size;
-}
-
-static void create_screen_texture() {
-    if (screen_texture != NULL) {
-        SDL_DestroyTexture(screen_texture);
-    }
-
-    const SDL_Point size = screen_texture_size();
-    screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_TARGET, size.x, size.y);
-    SDL_SetTextureScaleMode(screen_texture, screen_texture_scale_mode());
-}
 
 static void init_scalemode() {
     const char* raw_scalemode = Config_GetString(CFG_KEY_SCALEMODE);
@@ -117,10 +85,6 @@ static void init_scalemode() {
 
     if (SDL_strcmp(raw_scalemode, "nearest") == 0) {
         scale_mode = SCALEMODE_NEAREST;
-    } else if (SDL_strcmp(raw_scalemode, "linear") == 0) {
-        scale_mode = SCALEMODE_LINEAR;
-    } else if (SDL_strcmp(raw_scalemode, "soft-linear") == 0) {
-        scale_mode = SCALEMODE_SOFT_LINEAR;
     } else if (SDL_strcmp(raw_scalemode, "square-pixels") == 0) {
         scale_mode = SCALEMODE_SQUARE_PIXELS;
     } else if (SDL_strcmp(raw_scalemode, "integer") == 0) {
@@ -136,26 +100,22 @@ static bool init_window() {
     }
 
     int window_width = Config_GetInt(CFG_KEY_WINDOW_WIDTH);
-
-    if (window_width < window_min_width) {
-        window_width = window_min_width;
-    }
+    window_width = SDL_max(window_width, window_min_width);
 
     int window_height = Config_GetInt(CFG_KEY_WINDOW_HEIGHT);
+    window_height = SDL_max(window_height, window_min_height);
 
-    if (window_height < window_min_height) {
-        window_height = window_min_height;
-    }
+    window = SDLGenericRenderer_Init(&(SDLRenderBackendInitInfo) {
+        .app_name = app_name,
+        .window_width = window_width,
+        .window_height = window_height,
+        .window_flags = window_flags,
+    });
 
-    if (!SDL_CreateWindowAndRenderer(app_name, window_width, window_height, window_flags, &window, &renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+    if (window == NULL) {
         return false;
     }
 
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    host_context.backend_kind = PLATFORM_HOST_BACKEND_SDL;
-    host_context.window = window;
-    host_context.renderer = renderer;
     return true;
 }
 
@@ -200,22 +160,13 @@ static int full_init() {
         return 1;
     }
 
-    // Initialize rendering subsystems
-    g_render_backend.init(&host_context);
-    ScanlineRenderer_Init(renderer);
+// #if DEBUG
+//     SDLDebugText_Initialize(renderer);
+// #endif
 
-#if DEBUG
-    SDLDebugText_Initialize(renderer);
-#endif
-
-    // Initialize screen texture
-    create_screen_texture();
-
-    // Initialize pads
-    InputBackend_Init();
-
-#if DEBUG
-    ImGuiW_Init(window, renderer);
+// Initialize pads
+#if CRS_INPUT_DRIVER_SDL
+    SDLPad_Init();
 #endif
 
 #if _WIN32 && DEBUG
@@ -223,7 +174,7 @@ static int full_init() {
 #endif
 
     ArcadeBalance_Init();
-    AFS_Init(Resources_GetAFSPath());
+    AFS_Init(Resources_GetAFSPath(), 256 * 1024);
 
 #if DEBUG
     DebugConfig_Init();
@@ -236,28 +187,10 @@ static int full_init() {
 static void cleanup() {
     AFS_Finish();
     Config_Destroy();
-    g_render_backend.shutdown();
-    ScanlineRenderer_Destroy();
-
-#if DEBUG
-    ImGuiW_Finish();
-#endif
-
-    if (screen_texture != NULL) {
-        SDL_DestroyTexture(screen_texture);
-        screen_texture = NULL;
-    }
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    renderer = NULL;
-    window = NULL;
-    host_context.backend_kind = PLATFORM_HOST_BACKEND_NONE;
-    host_context.window = NULL;
-    host_context.renderer = NULL;
+    SDLGenericRenderer_Quit();
 }
 
-#if DEBUG
+#if DEBUG && IMGUI
 static void toggle_debug_window_visibility(SDL_KeyboardEvent* event) {
     if ((event->key == SDLK_GRAVE) && event->down && !event->repeat) {
         ImGuiW_ToggleVisivility();
@@ -301,19 +234,21 @@ static bool poll_events() {
     bool continue_running = true;
 
     while (SDL_PollEvent(&event)) {
-#if DEBUG
+#if DEBUG && IMGUI
         ImGuiW_ProcessEvent(&event);
 #endif
 
         switch (event.type) {
         case SDL_EVENT_GAMEPAD_ADDED:
         case SDL_EVENT_GAMEPAD_REMOVED:
-            InputBackend_HandleGamepadDeviceEvent(&event.gdevice);
+#if CRS_INPUT_DRIVER_SDL
+            SDLPad_HandleGamepadDeviceEvent(&event.gdevice);
+#endif
             break;
 
         case SDL_EVENT_KEY_DOWN:
         case SDL_EVENT_KEY_UP:
-#if DEBUG
+#if DEBUG && IMGUI
             toggle_debug_window_visibility(&event.key);
 #endif
 
@@ -322,10 +257,6 @@ static bool poll_events() {
 
         case SDL_EVENT_MOUSE_MOTION:
             handle_mouse_motion();
-            break;
-
-        case SDL_EVENT_WINDOW_RESIZED:
-            create_screen_texture();
             break;
 
         case SDL_EVENT_QUIT:
@@ -338,40 +269,37 @@ static bool poll_events() {
 }
 
 static void begin_frame() {
-    // Clear window
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderClear(renderer);
+#if STATCHECK
+    TestRunner_Prologue();
+#endif
 
-    g_render_backend.begin_frame();
-
-#if DEBUG
-    ImGuiW_BeginFrame();
+#if DEBUG && IMGUI
+    ImGuiW_NewFrame();
 #endif
 
     AFS_RunServer();
 }
 
-static void center_rect(SDL_FRect* rect, int win_w, int win_h) {
+static void center_rect(SDL_Rect* rect, int win_w, int win_h) {
     rect->x = (win_w - rect->w) / 2;
     rect->y = (win_h - rect->h) / 2;
 }
 
-static SDL_FRect fit_4_by_3_rect(int win_w, int win_h) {
-    SDL_FRect rect;
+static SDL_Rect fit_4_by_3_rect(int win_w, int win_h) {
+    SDL_Rect rect;
     rect.w = win_w;
-    rect.h = win_w / display_target_ratio;
+    rect.h = (int)((float)win_w / display_target_ratio);
 
     if (rect.h > win_h) {
         rect.h = win_h;
-        rect.w = win_h * display_target_ratio;
+        rect.w = (int)((float)win_h * display_target_ratio);
     }
 
     center_rect(&rect, win_w, win_h);
     return rect;
 }
 
-static SDL_FRect fit_integer_rect(int win_w, int win_h, int pixel_w, int pixel_h) {
+static SDL_Rect fit_integer_rect(int win_w, int win_h, int pixel_w, int pixel_h) {
     const int virtual_w = win_w / pixel_w;
     const int virtual_h = win_h / pixel_h;
     const int scale_w = virtual_w / 384;
@@ -383,18 +311,16 @@ static SDL_FRect fit_integer_rect(int win_w, int win_h, int pixel_w, int pixel_h
         scale = 1;
     }
 
-    SDL_FRect rect;
+    SDL_Rect rect;
     rect.w = scale * 384 * pixel_w;
     rect.h = scale * 224 * pixel_h;
     center_rect(&rect, win_w, win_h);
     return rect;
 }
 
-static SDL_FRect get_letterbox_rect(int win_w, int win_h) {
+static SDL_Rect get_letterbox_rect(int win_w, int win_h) {
     switch (scale_mode) {
     case SCALEMODE_NEAREST:
-    case SCALEMODE_LINEAR:
-    case SCALEMODE_SOFT_LINEAR:
         return fit_4_by_3_rect(win_w, win_h);
 
     case SCALEMODE_INTEGER:
@@ -423,50 +349,31 @@ static void update_metrics(Uint64 sleep_time) {
 }
 
 static void end_frame() {
+#if STATCHECK
+    TestRunner_Epilogue();
+#endif
+
     // Run sound processing
     ADX_ProcessTracks();
 
     // Render
 
+#if NETPLAY_ENABLED
     // This should come before SDLGameRenderer_RenderFrame,
     // because NetstatsRenderer uses the existing SFIII rendering pipeline
     NetplayScreen_Render();
     NetstatsRenderer_Render();
-    g_render_backend.render_frame();
-
-    SDL_Texture* scene_canvas = g_render_backend.get_canvas_handle();
-
-    SDL_SetRenderTarget(renderer, screen_texture);
-
-    // Render window background
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // black bars
-    SDL_RenderClear(renderer);
-
-    // Render content
-    const SDL_FRect dst_rect = get_letterbox_rect(screen_texture->w, screen_texture->h);
-    SDL_RenderTexture(renderer, scene_canvas, NULL, &dst_rect);
-
-    // Render screen texture to screen
-    SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderTexture(renderer, screen_texture, NULL, NULL);
-
-    // Apply scanlines using a cached overlay texture.
-    int win_w, win_h;
-    SDL_GetRenderOutputSize(renderer, &win_w, &win_h);
-    const SDL_FRect game_rect = get_letterbox_rect(win_w, win_h);
-    ScanlineRenderer_Render(&game_rect);
+#endif
 
 #if DEBUG
     // Render debug text
-    SDLDebugText_Render();
-
-    ImGuiW_EndFrame(renderer);
+    // SDLDebugText_Render();
 #endif
 
-    SDL_RenderPresent(renderer);
-
-    // Cleanup
-    g_render_backend.end_frame();
+    int window_width;
+    int window_height;
+    SDL_GetWindowSizeInPixels(window, &window_width, &window_height);
+    SDLGenericRenderer_RenderFrame(get_letterbox_rect(window_width, window_height));
 
     // Handle cursor hiding
     hide_cursor_if_needed();
@@ -521,7 +428,13 @@ static int loop() {
             pre_init();
 
             if (Resources_Check()) {
-                full_init();
+                const int init_status = full_init();
+
+                if (init_status != 0) {
+                    is_running = false;
+                    break;
+                }
+
                 phase = APP_PHASE_INITIALIZED;
             } else {
                 phase = APP_PHASE_COPYING_RESOURCES;
@@ -541,7 +454,13 @@ static int loop() {
             const bool resource_flow_ended = Resources_RunResourceCopyingFlow();
 
             if (resource_flow_ended) {
-                full_init();
+                const int init_status = full_init();
+
+                if (init_status != 0) {
+                    is_running = false;
+                    break;
+                }
+
                 phase = APP_PHASE_INITIALIZED;
             }
 
@@ -568,6 +487,7 @@ static int loop() {
 }
 
 int main(int argc, const char* argv[]) {
+    init_args(argc, argv);
     return loop();
 }
 

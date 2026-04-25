@@ -13,6 +13,33 @@ echo "Detected OS: $OS"
 echo "Using cmake from: $(which cmake)"
 cmake --version
 
+detect_build_jobs() {
+    case "$OS" in
+        Darwin)
+            sysctl -n hw.ncpu
+            ;;
+        MINGW*|MSYS*|CYGWIN*)
+            echo "${NUMBER_OF_PROCESSORS:-4}"
+            ;;
+        *)
+            if command -v nproc >/dev/null 2>&1; then
+                nproc
+            elif command -v getconf >/dev/null 2>&1; then
+                getconf _NPROCESSORS_ONLN
+            else
+                echo 4
+            fi
+            ;;
+    esac
+}
+
+BUILD_JOBS="${BUILD_JOBS:-}"
+if [ -z "$BUILD_JOBS" ]; then
+    BUILD_JOBS="$(detect_build_jobs)"
+fi
+
+echo "Using $BUILD_JOBS build job(s)"
+
 # -----------------------------
 # FFmpeg
 # -----------------------------
@@ -79,7 +106,7 @@ else
             ;;
     esac
 
-    make -j$(nproc)
+    make -j"$BUILD_JOBS"
     make install
     echo "FFmpeg installed to $FFMPEG_BUILD"
 
@@ -114,9 +141,10 @@ else
     cmake -S "$SDL_SRC" -B "$SDL_SRC/cmake-build" \
         -DCMAKE_INSTALL_PREFIX="$SDL_BUILD" \
         -DBUILD_SHARED_LIBS=ON \
-        -DSDL_STATIC=OFF
+        -DSDL_SHARED=ON \
+        -DSDL_STATIC=ON
 
-    cmake --build "$SDL_SRC/cmake-build" -j$(nproc)
+    cmake --build "$SDL_SRC/cmake-build" -j"$BUILD_JOBS"
     cmake --install "$SDL_SRC/cmake-build"
 
     rm -rf "$SDL_SRC"
@@ -145,7 +173,7 @@ else
         -DNO_ASIO_BUILD=ON \
         -DBUILD_SHARED_LIBS=OFF
 
-    cmake --build "$GEKKONET_SRC/cmake-build" -j$(nproc)
+    cmake --build "$GEKKONET_SRC/cmake-build" -j"$BUILD_JOBS"
 
     mkdir -p "$GEKKONET_BUILD/include" "$GEKKONET_BUILD/lib"
     cp -r "$GEKKONET_SRC/GekkoLib/include/." "$GEKKONET_BUILD/include/"
@@ -178,7 +206,7 @@ else
         -DBUILD_SHARED_LIBS=OFF \
         -DSDLNET_INSTALL=ON
 
-    cmake --build "$SDL3_NET_SRC/cmake-build" -j$(nproc)
+    cmake --build "$SDL3_NET_SRC/cmake-build" -j"$BUILD_JOBS"
     cmake --install "$SDL3_NET_SRC/cmake-build"
 
     rm -rf "$SDL3_NET_SRC"
@@ -265,7 +293,7 @@ else
         -DMZ_LIBBSD=OFF \
         -DMZ_DECOMPRESS_ONLY=ON
 
-    cmake --build "$MINIZIP_NG_SRC/cmake-build" -j$(nproc)
+    cmake --build "$MINIZIP_NG_SRC/cmake-build" -j"$BUILD_JOBS"
     cmake --install "$MINIZIP_NG_SRC/cmake-build"
 
     rm -rf "$MINIZIP_NG_SRC"
@@ -301,7 +329,7 @@ else
         -DUSE_STATIC_TF_PSA_CRYPTO_LIBRARY=ON \
         -DTF_PSA_CRYPTO_CONFIG_FILE="configs/crypto-config-ccm-aes-sha256.h"
 
-    cmake --build "$TF_PSA_CRYPTO_SRC/cmake-build" -j$(nproc)
+    cmake --build "$TF_PSA_CRYPTO_SRC/cmake-build" -j"$BUILD_JOBS"
     cmake --install "$TF_PSA_CRYPTO_SRC/cmake-build"
 
     rm -rf "$TF_PSA_CRYPTO_SRC"

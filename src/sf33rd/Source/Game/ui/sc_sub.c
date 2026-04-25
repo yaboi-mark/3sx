@@ -5,7 +5,8 @@
 
 #include "sf33rd/Source/Game/ui/sc_sub.h"
 #include "common.h"
-#include "rendering/game_renderer.h"
+#include "constants.h"
+#include "port/config/config.h"
 #include "sf33rd/AcrSDK/ps2/flps2render.h"
 #include "sf33rd/AcrSDK/ps2/foundaps2.h"
 #include "sf33rd/Source/Common/PPGFile.h"
@@ -21,8 +22,8 @@
 #include "sf33rd/Source/Game/system/work_sys.h"
 #include "sf33rd/Source/Game/ui/sc_data.h"
 #include "structs.h"
-#include "port/config/config.h"
-#include "constants.h"
+
+#include "core/renderer.h"
 
 #define TO_UV_256(val) ((val) / 256.0f)
 #define TO_UV_256_NEG(val) (TO_UV_256(val))
@@ -161,7 +162,7 @@ const u8 ascProData[128] = {
 };
 
 SAFrame sa_frame[3][48];
-Polygon scrscrntex[4];
+ColoredVertex scrscrntex[4];
 u8 WipeLimit;
 u8 FadeLimit;
 s16 Hnc_Num;
@@ -184,8 +185,7 @@ void HUD_Shift_Init() {
         TopHUDShadowPriority = 3 + HUD_SHIFT;
         TopHUDFacePriority = 4 + HUD_SHIFT;
         TopHUDVitalPriority = 5 + HUD_SHIFT;
-    }
-    else {
+    } else {
         TopHUDPriority = 2;
         TopHUDShadowPriority = 3;
         TopHUDFacePriority = 4;
@@ -1005,7 +1005,8 @@ void stun_base_put(u8 Pl_Num, s16 len) {
     pos[1].y = pos[0].y;
     pos[2].x = pos[0].x;
     pos[2].y = pos[3].y;
-    njDrawPolygon2D(&vtx, 4, PrioBase[TopHUDFacePriority], 96);
+	// Fudged priority to fix overlap with stun_put
+    njDrawPolygon2D(&vtx, 4, PrioBase[TopHUDFacePriority + 1], 96);
 }
 
 void WipeInit() {
@@ -1260,8 +1261,15 @@ void stun_mark_write(u8 Pl_Num, s16 Len) {
 
     ppgSetupCurrentDataList(&ppgScrList);
     tlen = Len - 7;
-    scfont_sqput(
-        smark_pos_tbl[tlen][Pl_Num], 3, 10, 0, (smark_kind_tbl[tlen] * 4) + 1, 2, smark_kind_tbl[tlen] + 4, 1, TopHUDPriority);
+    scfont_sqput(smark_pos_tbl[tlen][Pl_Num],
+                 3,
+                 10,
+                 0,
+                 (smark_kind_tbl[tlen] * 4) + 1,
+                 2,
+                 smark_kind_tbl[tlen] + 4,
+                 1,
+                 TopHUDPriority);
 }
 
 void max_mark_write(s8 Pl_Num, u8 Gauge_Len, u8 Mchar, u8 Mass_Len) {
@@ -1498,9 +1506,25 @@ void player_face() {
     grade_tmp = Keep_Grade[Champion] - 1;
 
     if (grade_tmp < 0x18) {
-        scfont_sqput((Champion * 41) + 1, 1, 27, 2, Grade_Pos_TBL[grade_tmp][0], Grade_Pos_TBL[grade_tmp][1], 5, 1, TopHUDPriority);
+        scfont_sqput((Champion * 41) + 1,
+                     1,
+                     27,
+                     2,
+                     Grade_Pos_TBL[grade_tmp][0],
+                     Grade_Pos_TBL[grade_tmp][1],
+                     5,
+                     1,
+                     TopHUDPriority);
     } else {
-        scfont_sqput((Champion * 41) + 1, 1, 28, 2, Grade_Pos_TBL[grade_tmp][0], Grade_Pos_TBL[grade_tmp][1], 5, 1, TopHUDPriority);
+        scfont_sqput((Champion * 41) + 1,
+                     1,
+                     28,
+                     2,
+                     Grade_Pos_TBL[grade_tmp][0],
+                     Grade_Pos_TBL[grade_tmp][1],
+                     5,
+                     1,
+                     TopHUDPriority);
     }
 }
 
@@ -1570,7 +1594,7 @@ void hnc_set(u8 num, u8 atr) {
 }
 
 void hnc_wipeinit(u8 atr) {
-    Polygon dmyvtx[4];
+    ColoredVertex dmyvtx[4];
     u8 i;
     u8 j;
     u8 k;
@@ -1600,7 +1624,7 @@ void hnc_wipeinit(u8 atr) {
 }
 
 s32 hnc_wipeout(u8 atr) {
-    Polygon vtx[4];
+    ColoredVertex vtx[4];
     u8 i;
     u8 j;
     u8 k;
