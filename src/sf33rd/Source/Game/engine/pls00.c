@@ -176,7 +176,6 @@ void nm_01000(PLW* wk) { // 🟡
 }
 
 void nm_02000(PLW* wk) { // 🟡
-    printf("TESTING 02000\n");
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(&wk->wu);
         return;
@@ -256,7 +255,6 @@ void nm_02000(PLW* wk) { // 🟡
 
 //seems to be walking back and forward. maybe crouching too?
 void nm_03000(PLW* wk) { // 🟡
-    printf("TESTING 03000\n");
     if (check_ashimoto(wk)) {
         return;
     }
@@ -338,7 +336,6 @@ void nm_05000(PLW* wk) { // 🟢
 
 //i think this is uncrouching
 void nm_07000(PLW* wk) { // 🟡
-    printf("TESTING 07000\n");
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(&wk->wu);
         return;
@@ -416,7 +413,6 @@ void nm_07000(PLW* wk) { // 🟡
 }
 
 void nm_08000(PLW* wk) { // 🟡
-    printf("TESTING 08000\n");
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_09000(&wk->wu);
         return;
@@ -495,7 +491,6 @@ void nm_08000(PLW* wk) { // 🟡
 }
 
 void nm_09000(PLW* wk) { // 🟡
-    printf("TESTING 09000\n");
     if (setup_kuzureochi(wk)) {
         return;
     }
@@ -570,7 +565,6 @@ void nm_09000(PLW* wk) { // 🟡
 }
 
 void nm_10000(PLW* wk) { // 🟡
-    printf("TESTING 10000\n");
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_09000(&wk->wu);
         return;
@@ -636,12 +630,10 @@ void nm_10000(PLW* wk) { // 🟡
 }
 
 void nm_11000(PLW* wk) { // 🔵
-    printf("TESTING 11000\n");
     // Do nothing
 }
 
 void nm_13000(PLW* wk) { // 🔵
-    printf("TESTING 13000\n");
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(wk);
     }
@@ -1244,7 +1236,6 @@ void jumping_guard_type_check(PLW* wk) { // 🟢
 
 //i think taunts get redirected to here
 void nm_27000(PLW* wk) { // 🟡
-    printf("TESTING 27000\n");
 
     if (wk->wu.routine_no[2] == 30) {
         if (check_F_R_walk(wk)) {
