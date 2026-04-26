@@ -326,9 +326,9 @@ void nm_03000(PLW* wk) { // 🟡
 
 //in a dash
 void nm_05000(PLW* wk) { // 🟢
-    if (wk->is_in_airdash) {
-        if ()
-    }
+    //if (wk->is_in_airdash) {
+    //    if ()
+    //}
     if (check_ashimoto_ex(wk) == 0) {
         jumping_cg_type_check(wk);
     }
