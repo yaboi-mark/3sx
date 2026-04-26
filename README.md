@@ -1,3 +1,12 @@
+i've left the original 3sx readme below, but there's a few notes to it i'd like to add.
+
+this is Street Fighter 3: Xrd strike, my shitty mod held together with bubblegum and dreams, yanderedev style.
+
+updates aren't promised nor regular, if you want anything out of me related to this mod plase harass me on discord, my tag is `mommyplier_`.
+
+also, no patch notes. i'm just ~~annoying~~ silly like that.
+
+
 # 3SX
 
 3SX is a native port of *Street Fighter III: 3rd Strike* that focuses on modern platforms.
