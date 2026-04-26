@@ -23,6 +23,7 @@ s32 check_jump_ready(PLW* wk);
 s32 check_hijump_only(PLW* wk);
 s32 check_bend_myself(PLW* wk);
 s16 check_F_R_walk(PLW* wk);
+s16 check_air_dash_end(PLW* wk);
 s16 check_arcade_walk_start(PLW* wk);
 s32 check_turn_to_back(PLW* wk);
 s32 check_hurimuki(WORK* wk);

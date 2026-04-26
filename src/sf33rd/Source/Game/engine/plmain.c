@@ -33,8 +33,8 @@
 void plmv_1010(PLW* wk);
 void plmv_1020(PLW* wk, s16 step);
 void mpg_union(PLW* wk);
-void eag_union(PLW* wk);
 void sag_union(PLW* wk);
+void eag_union(PLW* wk);
 void addSAAttribute(u8* kow, u16* koa);
 void check_omop_vital(PLW* wk);
 s16 select_hit_stop(s16 ms, s16 sb);
@@ -573,6 +573,7 @@ void mpg_union(PLW* wk) { // 🟡
     }
 }
 
+//this is where the super meter gets deducted for ex moves
 void eag_union(PLW* wk) { // 🟡
     switch (wk->sa->ex_rno) {
     case 0:
@@ -613,16 +614,21 @@ void eag_union(PLW* wk) { // 🟡
         break;
 
     case 2:
+    case 112:  //this is for YRC kinda shit, number is chosen arbitrarily to prevent conflict bc i don't actually know what i'm doing
+        s16 ex_use_amount = use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
+        if (wk->sa->ex_rno == 112) {
+            ex_use_amount /= 2;
+        }
         if (!pcon_dp_flag) {
             if (wk->sa->gauge_type == 1 && wk->sa->store == wk->sa->store_max) {
                 wk->sa->gauge.i = 0;
             }
 
-            if (wk->sa->gauge.s.h >= use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]]) {
-                wk->sa->gauge.s.h -= use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
+            if (wk->sa->gauge.s.h >= ex_use_amount) {
+                wk->sa->gauge.s.h -= ex_use_amount;
             } else {
                 wk->sa->store--;
-                wk->sa->gauge.s.h += wk->sa->gauge_len - use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
+                wk->sa->gauge.s.h += wk->sa->gauge_len - ex_use_amount;
             }
         }
 

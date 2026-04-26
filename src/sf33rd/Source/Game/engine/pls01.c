@@ -16,6 +16,7 @@
 #include "sf33rd/Source/Game/engine/workuser.h"
 #include "sf33rd/Source/Game/stage/bg_sub.h"
 #include "sf33rd/Source/Game/system/sysdir.h"
+#include "stdio.h"
 
 const u8 about_rno[6] = { 0, 1, 2, 1, 2, 0 };
 
@@ -232,20 +233,24 @@ s32 check_air_jump(PLW* wk) { // 🟢
     }
 
     wk->wu.routine_no[1] = 0;
-    wk->wu.routine_no[2] = 53;
+    if (wk->player_number == CHAR_REMY) { // FIXME: remy's normal air jump crashes the game??? why??? the workaround is make them use walljump rno instead
+        wk->wu.routine_no[2] = 24;
+    } else {
+        wk->wu.routine_no[2] = 53;
+    }
     wk->wu.routine_no[3] = 0;
     grade_add_command_waza(wk->wu.id);
     return 1;
 }
 
-s32 check_sankaku_tobi(PLW* wk) { // 🟢
+s32 check_sankaku_tobi(PLW* wk) { // wall jump
     if (wk->spmv_ng_flag & DIP_WALL_JUMP_DISABLED) {
         return 0;
     }
 
-    if (wk->extra_jump > 1) {
-        return 0;
-    }
+    //if (wk->extra_jump > 1) {
+    //    return 0;
+    //}
 
     if ((wk->wu.pat_status != 20) && (wk->wu.pat_status != 24) && (wk->wu.pat_status != 26) &&
         (wk->wu.pat_status != 30)) {
@@ -333,11 +338,16 @@ void remake_sankaku_tobi_mvxy(WORK* wk, u8 kabe) { // 🟡
 s16 check_F_R_dash(PLW* wk) { // 🟢
     s16 num;
     s16 rnum;
+    s16 is_air = 0;
 
     if (Bonus_Game_Flag != 20 || !wk->bs2_on_car) {
         if (wk->wu.xyz[1].disp.pos > 0) {
-            return 0;
+            is_air = 1;
         }
+    }
+
+    if (is_air && wk->extra_jump > 1) {
+        return 0;
     }
 
     num = (wk->cp->waza_flag[0] != 0) + (wk->cp->waza_flag[1] != 0) * 2;
@@ -351,6 +361,12 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
                 wk->wu.routine_no[2] = 5;
                 wk->wu.routine_no[3] = 0;
                 rnum = 1;
+                wk->last_dash_dir = 1;
+            }
+
+            if (is_air) {
+                wk->extra_jump += 1;
+                wk->is_in_airdash = 1;
             }
 
             break;
@@ -361,6 +377,12 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
                 wk->wu.routine_no[2] = 6;
                 wk->wu.routine_no[3] = 0;
                 rnum = 1;
+                wk->last_dash_dir = 2;
+            }
+
+            if (is_air) {
+                wk->extra_jump += 1;
+                wk->is_in_airdash = 1;
             }
 
             break;
@@ -384,6 +406,37 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
         grade_add_command_waza(wk->wu.id);
     }
 
+    return rnum;
+}
+
+s16 check_air_dash_end(PLW* wk) {
+    s16 rnum = 0;
+    s16 is_air = 0;
+
+    if (Bonus_Game_Flag != 20 || !wk->bs2_on_car) {
+        if (wk->wu.xyz[1].disp.pos > 0) {
+            is_air = 1;
+        }
+    }
+
+    if (is_air) {
+        switch (wk->last_dash_dir) {
+            case 1: //forward
+                rnum = 1;
+                wk->wu.routine_no[2] = 18;
+                wk->wu.routine_no[3] = 0;
+                wk->last_dash_dir = 0;
+                wk->is_in_airdash = 0;
+                break;
+            case 2: //backward
+                rnum = 1;
+                wk->wu.routine_no[2] = 20;
+                wk->wu.routine_no[3] = 0;
+                wk->last_dash_dir = 0;
+                wk->is_in_airdash = 0;
+                break;
+        }
+    }
     return rnum;
 }
 
@@ -468,22 +521,22 @@ s32 check_bend_myself(PLW* wk) { // 🟢
 
 s16 check_F_R_walk(PLW* wk) { // 🟢
     s16 rnum = 0;
-
+    wk->is_in_airdash = 0;
     switch (wk->cp->lever_dir) {
-    case 1:
-        wk->wu.routine_no[1] = 0;
-        wk->wu.routine_no[2] = 3;
-        wk->wu.routine_no[3] = 0;
-        rnum = 1;
-        break;
+        case 1:
+            rnum = 1;
+            wk->wu.routine_no[1] = 0;
+            wk->wu.routine_no[2] = 3;
+            wk->wu.routine_no[3] = 0;
+            break;
 
-    case 2:
-        wk->wu.routine_no[1] = 0;
-        wk->wu.routine_no[2] = 4;
-        wk->wu.routine_no[3] = 0;
-        rnum = 1;
-        break;
-    }
+        case 2:
+            rnum = 1;
+            wk->wu.routine_no[1] = 0;
+            wk->wu.routine_no[2] = 4;
+            wk->wu.routine_no[3] = 0;
+            break;
+        }
 
     return rnum;
 }

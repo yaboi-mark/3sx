@@ -324,33 +324,37 @@ const SA_DATA super_arts_DATA[20][4] = { { { 20, 24, 25, 0, 0, 0, 0, 3, 120, 2, 
                                            { 21, 0, 0, 0, 0, 0, 0, 0, 120, 2, 65536 },
                                            { 0, 0, 0, 0, 0, 0, 0, 0, 64, 1, 65536 } } };
 
-const s16 pl_piyo_tbl[NUM_CHARS] = {
-    72, // Gill
-    72, // Alex
-    64, // Ryu
-    64, // Yun
-    72, // Dudley
-    64, // Necro
-    72, // Hugo
-    64, // Ibuki
-    64, // Elena
-    72, // Oro
-    64, // Yang
-    64, // Ken
-    64, // Sean
-    64, // Urien
-    56, // Akuma
+#define BURST_SPEED_FAST 14
+#define BURST_SPEED_NORMAL 16
+#define BURST_SPEED_SLOW 18
+
+const s16 pl_piyo_tbl[NUM_CHARS] = {    //stun max
+    BURST_SPEED_FAST, // Gill
+    BURST_SPEED_FAST, // Alex
+    BURST_SPEED_NORMAL, // Ryu
+    BURST_SPEED_NORMAL, // Yun
+    BURST_SPEED_FAST, // Dudley
+    BURST_SPEED_NORMAL, // Necro
+    BURST_SPEED_FAST, // Hugo
+    BURST_SPEED_NORMAL, // Ibuki
+    BURST_SPEED_NORMAL, // Elena
+    BURST_SPEED_FAST, // Oro
+    BURST_SPEED_NORMAL, // Yang
+    BURST_SPEED_NORMAL, // Ken
+    BURST_SPEED_NORMAL, // Sean
+    BURST_SPEED_NORMAL, // Urien
+    BURST_SPEED_SLOW, // Akuma
 #if CPS3
-    56, // Shin Akuma
+    BURST_SPEED_SLOW, // Shin Akuma
 #endif
-    64, // Chun-Li
-    64, // Makoto
-    72, // Q
-    64, // Twelve
-    56, // Remy
+    BURST_SPEED_NORMAL, // Chun-Li
+    BURST_SPEED_NORMAL, // Makoto
+    BURST_SPEED_FAST, // Q
+    BURST_SPEED_NORMAL, // Twelve
+    BURST_SPEED_SLOW, // Remy
 };
 
-const s32 pl_nr_piyo_tbl[NUM_CHARS] = {
+const s32 pl_nr_piyo_tbl[NUM_CHARS] = { //stun decay rate (holy shit this is inconsistent numbers)
     3276, // Gill
     2849, // Alex
     2978, // Ryu
@@ -1427,7 +1431,7 @@ void set_kizetsu_status(s16 ix) {
     piyori_type[ix].now.timer = 0;
     piyori_type[ix].store = 0;
     piyori_type[ix].recover = pl_nr_piyo_tbl[plnum];
-    piyori_type[ix].genkai = pl_piyo_tbl[plnum] + stun_gauge_len_omake[omop_stun_gauge_len[ix]];
+    piyori_type[ix].genkai = pl_piyo_tbl[plnum];// + stun_gauge_len_omake[omop_stun_gauge_len[ix]];
 
     /*if (piyori_type[ix].genkai < 56) {
         piyori_type[ix].genkai = 56;

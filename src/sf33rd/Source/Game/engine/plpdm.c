@@ -890,7 +890,8 @@ void Damage_25000(PLW* wk) {
         wk->wu.routine_no[3]++;
         set_char_move_init(&wk->wu, 1, wk->as->char_ix);
         wk->py->flag = 0;
-        wk->py->time = kizetsu_timer_table[(wk->kizetsu_kow & 0xF8) / 8][(wk->kizetsu_kow & 7) / 2][random_16()];
+        //wk->py->time = kizetsu_timer_table[(wk->kizetsu_kow & 0xF8) / 8][(wk->kizetsu_kow & 7) / 2][random_16()];
+        wk->py->time = 0;
         wk->zuru_timer = 0;
         wk->zuru_ix_counter = 0;
         SDL_zerop(wk->rp);

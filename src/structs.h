@@ -637,6 +637,8 @@ typedef struct {
     u8 init_E4_flag;
     u16 pl09_dat_index;
     s16 reserv_add_y;
+    s16 last_dash_dir;
+    s16 is_in_airdash;
 } PLW;
 
 typedef struct {
