@@ -520,6 +520,7 @@ typedef struct {
     // Invulnerability?
     bool zuru_flag;
 
+    // grab invulnerability? it seems to translate to that
     s8 tsukamarenai_flag;
     u8 kizetsu_kow;
     u8 micchaku_flag;
@@ -537,7 +538,7 @@ typedef struct {
 
     s8 kind_of_catch;
     u8 old_gdflag;
-    u8 guard_flag;
+    u8 guard_flag;  //for some reason, guard flag seems to mean "can i be counter hit"
     u8 guard_chuu;
     s16 dm_ix;
     s16 hosei_amari;
@@ -637,7 +638,7 @@ typedef struct {
     u8 init_E4_flag;
     u16 pl09_dat_index;
     s16 reserv_add_y;
-    s16 last_dash_dir;
+    s16 last_dash_dir;  //this and the next one are a bit of a hacky way to handle airdashes.
     s16 is_in_airdash;
 } PLW;
 

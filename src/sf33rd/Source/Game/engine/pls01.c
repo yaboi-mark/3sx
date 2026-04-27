@@ -367,6 +367,7 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
             if (is_air) {
                 wk->extra_jump += 1;
                 wk->is_in_airdash = 1;
+                //wk->wu.routine_no[2] = 52;
             }
 
             break;
@@ -378,11 +379,15 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
                 wk->wu.routine_no[3] = 0;
                 rnum = 1;
                 wk->last_dash_dir = 2;
+                //backdash invulnerability, or at least my old attempt at it. i couldn't actually manage to make it work out.
+                //wk->zuru_timer = 50;
+                //wk->zuru_flag = true;
             }
 
             if (is_air) {
                 wk->extra_jump += 1;
                 wk->is_in_airdash = 1;
+                //wk->wu.routine_no[2] = 52;
             }
 
             break;
@@ -423,6 +428,7 @@ s16 check_air_dash_end(PLW* wk) {
         switch (wk->last_dash_dir) {
             case 1: //forward
                 rnum = 1;
+                wk->wu.routine_no[1] = 0;
                 wk->wu.routine_no[2] = 18;
                 wk->wu.routine_no[3] = 0;
                 wk->last_dash_dir = 0;
@@ -430,6 +436,7 @@ s16 check_air_dash_end(PLW* wk) {
                 break;
             case 2: //backward
                 rnum = 1;
+                wk->wu.routine_no[1] = 0;
                 wk->wu.routine_no[2] = 20;
                 wk->wu.routine_no[3] = 0;
                 wk->last_dash_dir = 0;

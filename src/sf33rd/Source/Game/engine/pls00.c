@@ -94,12 +94,25 @@ void TO_nm_18000_01(WORK* wk) { // 🟢
     nm_18000((PLW*)wk);
 }
 
-void nm_00000(PLW* /* unused */) { // 🟢
+void nm_00000(PLW* wk) { // 🟢
     // Do nothing
+#ifdef STATE_DEBUG
+    printf("testing 00000\n");
+#endif
+    if (check_roman_cancel(wk)) {
+        return;
+    }
 }
 
 //standing around n shit
 void nm_01000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 01000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
     if (setup_kuzureochi(wk)) {
         return;
     }
@@ -132,7 +145,7 @@ void nm_01000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -176,6 +189,14 @@ void nm_01000(PLW* wk) { // 🟡
 }
 
 void nm_02000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 02000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(&wk->wu);
         return;
@@ -214,7 +235,7 @@ void nm_02000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -255,6 +276,13 @@ void nm_02000(PLW* wk) { // 🟡
 
 //seems to be walking back and forward. maybe crouching too?
 void nm_03000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 03000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
     if (check_ashimoto(wk)) {
         return;
     }
@@ -283,7 +311,7 @@ void nm_03000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -326,9 +354,30 @@ void nm_03000(PLW* wk) { // 🟡
 
 //in a dash
 void nm_05000(PLW* wk) { // 🟢
-    //if (wk->is_in_airdash) {
-    //    if ()
-    //}
+#ifdef STATE_DEBUG
+    printf("testing 00000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+    
+    if (wk->is_in_airdash && (wk->cp->sw_lvbt & 0x770)) {
+        switch (wk->last_dash_dir) {
+            case 1: //forward
+                wk->wu.routine_no[2] = 18;
+                wk->wu.routine_no[3] = 0;
+                wk->last_dash_dir = 0;
+                wk->is_in_airdash = 0;
+                return;
+            case 2: //backward
+                wk->wu.routine_no[2] = 20;
+                wk->wu.routine_no[3] = 0;
+                wk->last_dash_dir = 0;
+                wk->is_in_airdash = 0;
+                return;
+        }
+    }
     if (check_ashimoto_ex(wk) == 0) {
         jumping_cg_type_check(wk);
     }
@@ -336,8 +385,15 @@ void nm_05000(PLW* wk) { // 🟢
 
 //i think this is uncrouching
 void nm_07000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 07000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(&wk->wu);
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -369,7 +425,7 @@ void nm_07000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -413,6 +469,9 @@ void nm_07000(PLW* wk) { // 🟡
 }
 
 void nm_08000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 08000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_09000(&wk->wu);
         return;
@@ -420,6 +479,10 @@ void nm_08000(PLW* wk) { // 🟡
 
     if (wk->wu.cg_type == 64) {
         TO_nm_37000(&wk->wu);
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -451,7 +514,7 @@ void nm_08000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -491,7 +554,15 @@ void nm_08000(PLW* wk) { // 🟡
 }
 
 void nm_09000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 09000\n");
+#endif
+    
     if (setup_kuzureochi(wk)) {
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -523,7 +594,7 @@ void nm_09000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -565,8 +636,15 @@ void nm_09000(PLW* wk) { // 🟡
 }
 
 void nm_10000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 10000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_09000(&wk->wu);
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -598,7 +676,7 @@ void nm_10000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -630,10 +708,16 @@ void nm_10000(PLW* wk) { // 🟡
 }
 
 void nm_11000(PLW* wk) { // 🔵
+#ifdef STATE_DEBUG
+    printf("testing 11000\n");
+#endif
     // Do nothing
 }
 
 void nm_13000(PLW* wk) { // 🔵
+#ifdef STATE_DEBUG
+    printf("testing 13000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_01000(wk);
     }
@@ -641,6 +725,14 @@ void nm_13000(PLW* wk) { // 🔵
 
 //do a jump
 void nm_16000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 16000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     set_new_jpdir(wk);
 
     if (wk->wu.routine_no[3] == 0) {
@@ -696,13 +788,21 @@ void nm_16000(PLW* wk) { // 🟢
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 }
 
 //do a jump but different for some reason idk
 void nm_17000(PLW* wk) { // 🟢 The only difference is DIP switch handling
+#ifdef STATE_DEBUG
+    printf("testing 17000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     set_new_jpdir(wk);
 
     if (wk->wu.routine_no[3] == 0) {
@@ -758,7 +858,7 @@ void nm_17000(PLW* wk) { // 🟢 The only difference is DIP switch handling
         return;
     }
 
-    check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT);
+    check_chouhatsu(wk);
 }
 
 void check_jump_rl_dir(PLW* wk) { // 🟢
@@ -777,6 +877,11 @@ void set_new_jpdir(PLW* wk) { // 🟢
 
 //related to jump
 void nm_18000(PLW* wk) { // 🟢
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (wk->wu.routine_no[3] < 2 && wk->wu.xyz[1].disp.pos > 0) { //actively jumping. if false, is landing.
         if (check_full_gauge_attack(wk, 0)) {
             return;
@@ -802,7 +907,7 @@ void nm_18000(PLW* wk) { // 🟢
             return;
         }
 
-        if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+        if (check_chouhatsu(wk)) {
             return;
         }
 
@@ -831,6 +936,11 @@ void nm_18000(PLW* wk) { // 🟢
 }
 
 void jumping_cg_type_check(PLW* wk) { // 🟡
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (wk->wu.pat_status < 32) {
         switch (wk->wu.cg_type) {
         case 0xFF:
@@ -874,7 +984,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 return;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -928,7 +1038,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 return;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -978,7 +1088,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 break;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -1071,7 +1181,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 return;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -1125,7 +1235,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 return;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -1171,7 +1281,7 @@ void jumping_cg_type_check(PLW* wk) { // 🟡
                 break;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 break;
             }
 
@@ -1236,6 +1346,13 @@ void jumping_guard_type_check(PLW* wk) { // 🟢
 
 //i think taunts get redirected to here
 void nm_27000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 27000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
 
     if (wk->wu.routine_no[2] == 30) {
         if (check_F_R_walk(wk)) {
@@ -1243,7 +1360,7 @@ void nm_27000(PLW* wk) { // 🟡
         }
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -1363,8 +1480,15 @@ void nm_27_cg_type_check(PLW* wk) { // 🟢
 }
 
 void nm_29000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 29000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         TO_nm_09000(&wk->wu);
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -1396,7 +1520,7 @@ void nm_29000(PLW* wk) { // 🟡
         return;
     }
 
-    if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+    if (check_chouhatsu(wk)) {
         return;
     }
 
@@ -1438,7 +1562,14 @@ void nm_29000(PLW* wk) { // 🟡
 }
 
 void nm_31000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 31000\n");
+#endif
     if (wk->wu.routine_no[3] == 0) {
+        return;
+    }
+
+    if (check_roman_cancel(wk)) {
         return;
     }
 
@@ -1468,7 +1599,7 @@ void nm_31000(PLW* wk) { // 🟢
             break;
         }
 
-        if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+        if (check_chouhatsu(wk)) {
             break;
         }
 
@@ -1500,6 +1631,9 @@ void nm_31000(PLW* wk) { // 🟢
 }
 
 void nm_34000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 34000\n");
+#endif
     if (wk->wu.routine_no[3] == 0) {
         return;
     }
@@ -1526,6 +1660,9 @@ void nm_34000(PLW* wk) { // 🟢
 }
 
 void nm_36000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 36000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         if (wk->wu.now_koc == 0 && wk->wu.char_index == 0) {
             wk->wu.routine_no[2] = 1;
@@ -1544,6 +1681,9 @@ void nm_36000(PLW* wk) { // 🟢
 }
 
 void nm_37000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 37000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         wk->wu.routine_no[2] = 9;
         wk->wu.routine_no[3] = 0;
@@ -1553,6 +1693,9 @@ void nm_37000(PLW* wk) { // 🟢
 }
 
 void nm_38000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 38000\n");
+#endif
     bool in_air = true;
 
     if (!ArcadeBalance_IsEnabled()) {
@@ -1560,6 +1703,11 @@ void nm_38000(PLW* wk) { // 🟡
     }
 
     if (wk->wu.routine_no[3] < 2 && in_air) {
+
+        if (check_roman_cancel(wk)) {
+            return;
+        
+        }
         if (check_full_gauge_attack(wk, 0)) {
             return;
         }
@@ -1584,7 +1732,7 @@ void nm_38000(PLW* wk) { // 🟡
             return;
         }
 
-        if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+        if (check_chouhatsu(wk)) {
             return;
         }
 
@@ -1615,6 +1763,9 @@ void nm_38000(PLW* wk) { // 🟡
 }
 
 void nm_39000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 39000\n");
+#endif
     if (wk->wu.cg_type == 0xFF) {
         if (wk->wu.now_koc == 0 && wk->wu.char_index == 0) {
             wk->wu.routine_no[2] = 1;
@@ -1629,12 +1780,18 @@ void nm_39000(PLW* wk) { // 🟢
 }
 
 void nm_40000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 40000\n");
+#endif
     if (wk->wu.routine_no[3] && wk->wu.cg_type == 0xFF) {
         wk->wu.routine_no[3] = 9;
     }
 }
 
 void nm_42000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 42000\n");
+#endif
     if (ArcadeBalance_IsEnabled()) {
         if (wk->wu.routine_no[3] == 2 || wk->wu.routine_no[3] == 3) {
             if (FUN_06120790(wk)) {
@@ -1651,6 +1808,14 @@ void nm_42000(PLW* wk) { // 🟡
 }
 
 void nm_45000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 45000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (wk->wu.routine_no[3] == 3) {
         if (check_full_gauge_attack(wk, 0)) {
             return;
@@ -1676,7 +1841,7 @@ void nm_45000(PLW* wk) { // 🟢
             return;
         }
 
-        if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+        if (check_chouhatsu(wk)) {
             return;
         }
 
@@ -1719,24 +1884,44 @@ void nm_45000(PLW* wk) { // 🟢
 }
 
 void nm_47000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 47000\n");
+#endif
     if (wk->wu.routine_no[3] > 3) {
         jumping_cg_type_check(wk);
     }
 }
 
 void nm_48000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 48000\n");
+#endif
     jumping_cg_type_check(wk);
 }
 
 void nm_49000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 49000\n");
+#endif
     jumping_cg_type_check(wk);
 }
 
 void nm_51000(PLW* /* unused */) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 51000\n");
+#endif
     // Do nothing
 }
 
 void nm_52000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 52000\n");
+#endif
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (check_full_gauge_attack(wk, 0)) {
         return;
     }
@@ -1763,12 +1948,18 @@ void nm_52000(PLW* wk) { // 🟢
 }
 
 void nm_55000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 55000\n");
+#endif
     if (wk->wu.routine_no[3] > 1) {
         jumping_cg_type_check(wk);
     }
 }
 
 void nm_57000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 57000\n");
+#endif
     if (wk->wu.routine_no[3] > 2) {
         jumping_cg_type_check(wk);
     }
@@ -1833,6 +2024,9 @@ void process_damage(PLW* wk) { // 🟡
 }
 
 void dm_00000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 00000 dm\n");
+#endif
     if (wk->wu.routine_no[2] != 0) {
         return;
     }
@@ -1850,7 +2044,16 @@ void dm_00000(PLW* wk) { // 🟢
     wk->wu.routine_no[3]++;
 }
 
+//seems to be the most common damage state, but i might change this if needed
 void dm_04000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 04000 dm\n");
+#endif
+
+    if (check_dead_angle(wk)) {
+        return;
+    }
+
     switch (wk->wu.cg_type) {
     case 9:
         if (wk->py->flag == 0) {
@@ -1908,6 +2111,9 @@ void dm_04000(PLW* wk) { // 🟡
 }
 
 void dm_08000(PLW* wk) { // 🟡
+#ifdef STATE_DEBUG
+    printf("testing 08000 dm\n");
+#endif
     switch (wk->wu.cg_type) {
     case 0xFF:
         wk->tsukamarenai_flag = 7;
@@ -1937,6 +2143,9 @@ void dm_08000(PLW* wk) { // 🟡
 }
 
 void dm_17000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 17000 dm\n");
+#endif
     if (wk->wu.routine_no[3] == 3) {
         wk->wu.routine_no[1] = 0;
         wk->wu.routine_no[2] = 23;
@@ -1946,6 +2155,9 @@ void dm_17000(PLW* wk) { // 🟢
 }
 
 void dm_18000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 18000 dm\n");
+#endif
     switch (wk->wu.cg_type) {
     case 0xFF:
         if (wk->wu.vital_new < 0 && (check_sa_type_rebirth(wk) != 0)) {
@@ -1978,6 +2190,9 @@ void dm_18000(PLW* wk) { // 🟢
 }
 
 void dm_25000(PLW* wk) { // 🟢
+#ifdef STATE_DEBUG
+    printf("testing 25000 dm\n");
+#endif
     if (wk->sa_stop_flag == 1) {
         return;
     }
@@ -2015,6 +2230,9 @@ void process_catch(PLW* wk) { // 🟢
 }
 
 void dm_32000(PLW* wk) { // 🔵
+#ifdef STATE_DEBUG
+    printf("testing 32000 dm\n");
+#endif
     switch (wk->wu.cg_type) {
     case 64:
         if (wk->wu.pat_status < 32) {
@@ -2041,10 +2259,18 @@ void process_caught(PLW* /* unused */) { // 🟢
 }
 
 void dm_33000(PLW* wk) { // 🔵
+#ifdef STATE_DEBUG
+    printf("testing 33000 dm\n");
+#endif
     // Do nothing
 }
 
 void process_attack(PLW* wk) { // 🟢
+
+    if (check_roman_cancel(wk)) {
+        return;
+    }
+
     if (wk->wu.routine_no[3] != 0) {
         if (check_ashimoto_ex(wk)) {
             return;
@@ -2079,7 +2305,7 @@ void process_attack(PLW* wk) { // 🟢
                 return;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 return;
             }
 
@@ -2108,6 +2334,10 @@ void process_attack(PLW* wk) { // 🟢
 s32 check_cg_cancel_data(PLW* wk) { // 🟡
     if (wk->wu.cg_cancel == 0) {
         return 0;
+    }
+
+    if (check_roman_cancel(wk)) {
+        return 1;
     }
 
     if (wk->wu.meoshi_hit_flag != 0) {
@@ -2177,7 +2407,7 @@ s32 check_cg_cancel_data(PLW* wk) { // 🟡
                 return 1;
             }
 
-            if (check_chouhatsu(wk, ROMAN_CANCEL_TYPE_NOT_TAUNT)) {
+            if (check_chouhatsu(wk)) {
                 return 1;
             }
         }

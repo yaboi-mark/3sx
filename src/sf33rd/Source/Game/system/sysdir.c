@@ -206,9 +206,9 @@ void get_system_direction_parameter(SystemDir* sysdir_data) {
         omop_spmv_ng_table[0] |= DIP_GUARD_DISABLED;
     }
 
-    if (sysdir_data->contents[1][1] == 0) {
-        omop_spmv_ng_table[0] |= DIP_ABSOLUTE_GUARD_DISABLED;
-    }
+    //if (sysdir_data->contents[1][1] == 0) {
+    //    omop_spmv_ng_table[0] |= DIP_ABSOLUTE_GUARD_DISABLED;
+    //}
 
     omop_guard_distance_ix[0] = sysdir_data->contents[1][2];
 

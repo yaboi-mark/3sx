@@ -1155,7 +1155,7 @@ s32 FUN_06120790(PLW* wk) { // 🔵
 }
 
 /// Taunt check
-s32 check_chouhatsu(PLW* wk, roman_cancel_type roman_type) { // 🟢 Same overall but differs because of Start and DIP switches
+s32 check_chouhatsu(PLW* wk) { // 🟢 Same overall but differs because of Start and DIP switches
 
     if (wk->spmv_ng_flag & DIP_TAUNT_DISABLED) {
         return 0;
@@ -1165,15 +1165,9 @@ s32 check_chouhatsu(PLW* wk, roman_cancel_type roman_type) { // 🟢 Same overal
         return 0;
     }
 
-    s16 ex_drain_amount = (use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]] * 2) / 3;
-
-    if (wk->sa->gauge.s.h < ex_drain_amount && wk->sa->store == 0 && roman_type != ROMAN_CANCEL_TYPE_TAUNT) {
-        return 0;
-    }
-
     wk->permited_koa |= 0x80;
 
-    if (wk->wu.xyz[1].disp.pos > 0 && roman_type == ROMAN_CANCEL_TYPE_TAUNT) {
+    if (wk->wu.xyz[1].disp.pos > 0) {
         return 0;
     }
 
@@ -1189,88 +1183,169 @@ s32 check_chouhatsu(PLW* wk, roman_cancel_type roman_type) { // 🟢 Same overal
         return 0;
     }
 
+    if (((Bonus_Game_Flag != 0x14) || !wk->bs2_on_car) && (wk->wu.xyz[1].disp.pos > 0)) {
+        return 0;
+    }
+
     if (ArcadeBalance_IsEnabled()) {
         wk->as = &asstbl_lv_E010_arcade[CHAR_3SX_TO_ARCADE(wk->player_number)][0];
     } else {
         wk->as = &_asstbl_lv_E010[wk->player_number];
     }
 
-    if (roman_type != ROMAN_CANCEL_TYPE_TAUNT) {
-        if (wk->wu.xyz[1].disp.pos > 0) {   //oh my god this code is so spaghet its pulled from nm_16000
-            set_new_jpdir(wk);
-
-            //if (wk->wu.routine_no[3] != 0) {  //i'm not fully confident what this was from nm_16000
-            //    return;
-            //}
-            
-            wk->wu.routine_no[1] = 0;
-            wk->wu.routine_no[2] = 3;
-            wk->wu.routine_no[3] = 0;
-        
-            switch (wk->wu.cg_type) {
-            case 0xFF:
-                check_jump_rl_dir(wk);
-            
-                switch (wk->jpdir) {
-                case JUMP_DIR_FORWARD:
-                    wk->wu.routine_no[2] = 21;
-                    break;
-                
-                case JUMP_DIR_BACKWARD:
-                    wk->wu.routine_no[2] = 23;
-                    break;
-                
-                default:
-                    wk->wu.routine_no[2] = 22;
-                    break;
-                }
-            
-                wk->wu.routine_no[3] = 0;
-                break;
-            
-            case 1:
-                break;
-            }
-        }
-        else {
-            wk->wu.routine_no[1] = 0;
-            wk->wu.routine_no[2] = 3;
-            wk->wu.routine_no[3] = 0;
-        }
-        PLW* wk2;
-        s16 koc = 30;
-        s16 ix = 30;
-        s16 ix2 = 40;
-        s16 pat = 30;
-        wk->wu.dm_stop = 0;
-        wk->wu.hit_stop = koc;
-        wk2 = (PLW*)wk->wu.target_adrs;
-        wk2->wu.hit_stop = ix2;
-        wk2->sa_stop_sai = ix2 - 4;
-
-        if (wk2->sa_stop_sai < 0) {
-            wk2->sa_stop_sai = 1;
-        }
-
-        setup_shell_hit_stop(&wk->wu, ix, pat);
-        setup_shell_hit_stop(&wk2->wu, ix2, 0);
-        wk->sa_stop_flag = 0;
-        wk2->sa_stop_flag = 2;
-        wk2->just_sa_stop_timer = Game_timer;
-    }
-    else {
-        setup_comm_back(&wk->wu);
-        set_attack_routine_number(wk);
-    }
+    setup_comm_back(&wk->wu);
+    set_attack_routine_number(wk);
 
     wk->wu.paring_attack_flag = 0;
     wk->wu.meoshi_hit_flag = 0;
     wk->wu.att_hit_ok = 0;
     wk->wu.hf.hit_flag = 0;
 
-    wk->sa->ex_rno = 112;
+    return 1;
+}
+
+/// rc lessgoo
+s32 check_roman_cancel(PLW* wk) {
+
+
+
+    if (wk->guard_flag == 0) {
+        return 0;
+    }
+
+    s16 ex_drain_amount = use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
+
+    if (wk->sa->gauge.s.h < ex_drain_amount && wk->sa->store == 0) {
+        return 0;
+    }
+
+    wk->permited_koa |= 0x80;
+
+    if ((wk->cp->sw_lvbt & 0x770) != 0x440) {
+        return 0;
+    }
+
+    //if (wk->cp->ca36 == 0) {
+    //    return 0;
+    //}
+
+    if (ArcadeBalance_IsEnabled()) {
+        wk->as = &asstbl_lv_E010_arcade[CHAR_3SX_TO_ARCADE(wk->player_number)][0];
+    } else {
+        wk->as = &_asstbl_lv_E010[wk->player_number];
+    }
+
+    if (wk->wu.xyz[1].disp.pos > 0) {   //oh my god this code is so spaghet its pulled from nm_16000
+        set_new_jpdir(wk);
+
+        //if (wk->wu.routine_no[3] != 0) {  //i'm not fully confident what this was from nm_16000
+        //    return;
+        //}
+        
+        wk->wu.routine_no[1] = 0;
+        wk->wu.routine_no[2] = 3;
+        wk->wu.routine_no[3] = 0;
+
+        switch (wk->wu.cg_type) {
+        case 0xFF:
+            check_jump_rl_dir(wk);
+        
+            switch (wk->jpdir) {
+            case JUMP_DIR_FORWARD:
+                wk->wu.routine_no[2] = 21;
+                break;
+            
+            case JUMP_DIR_BACKWARD:
+                wk->wu.routine_no[2] = 23;
+                break;
+            
+            default:
+                wk->wu.routine_no[2] = 22;
+                break;
+            }
+        
+            wk->wu.routine_no[3] = 0;
+            break;
+        
+        case 1:
+            break;
+        }
+    }
+    else {
+        wk->wu.routine_no[1] = 0;
+        wk->wu.routine_no[2] = 3;
+        wk->wu.routine_no[3] = 0;
+    }
+    PLW* wk2;
+    s16 koc = 30;
+    s16 ix = 30;
+    s16 ix2 = 40;
+    s16 pat = 30;
+    wk->wu.dm_stop = 0;
+    wk->wu.hit_stop = koc;
+    wk2 = (PLW*)wk->wu.target_adrs;
+    wk2->wu.hit_stop = ix2;
+    wk2->sa_stop_sai = ix2 - 4;
+
+    if (wk2->sa_stop_sai < 0) {
+        wk2->sa_stop_sai = 1;
+    }
+
+    setup_shell_hit_stop(&wk->wu, ix, pat);
+    setup_shell_hit_stop(&wk2->wu, ix2, 0);
+    wk->sa_stop_flag = 0;
+    wk2->sa_stop_flag = 2;
+    wk2->just_sa_stop_timer = Game_timer;
+
+    wk->wu.paring_attack_flag = 0;
+    wk->wu.meoshi_hit_flag = 0;
+    wk->wu.att_hit_ok = 0;
+    wk->wu.hf.hit_flag = 0;
+
+    wk->sa->ex_rno = 2;
     about_gauge_process(wk);
     return 1;
+}
+
+s32 check_dead_angle(PLW* wk) {
+    //if (wk->player_number == CHAR_KEN) {
+    //    printf("guard_flag is %d\n", wk->wu.dm_stop);
+    //}
+
+    s16 ex_drain_amount = use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
+
+    if (wk->sa->gauge.s.h < ex_drain_amount && wk->sa->store == 0) {
+        return 0;
+    }
+
+    if (wk->cp->ca25 == 0) {
+        return 0;
+    }
+
+    if (wk->cp->sw_lvbt & 0xF) {
+        return 0;
+    }
+
+    if (((Bonus_Game_Flag != 0x14) || !wk->bs2_on_car) && (wk->wu.xyz[1].disp.pos > 0)) {
+        return 0;
+    }
+
+    if (ArcadeBalance_IsEnabled()) {
+        wk->as = &asstbl_lv_D010_arcade[CHAR_3SX_TO_ARCADE(wk->player_number)][0];
+    } else {
+        wk->as = &_asstbl_lv_D010[wk->player_number];
+    }
+
+    hissatsu_setup_union(wk, wk->cp->waza_r[14][0]);
+
+    wk->sa->ex_rno = 2;
+    about_gauge_process(wk);
+
+    //wk->wu.routine_no[1] = 0;
+    //wk->wu.routine_no[2] = 23;
+    //wk->wu.routine_no[3] = 0;
+    //return 1;
+    return 0;
 }
 
 s32 check_nagenuke_cmd(PLW* wk) { // 🟢 Same overall but differs because of DIP switches
