@@ -30,6 +30,7 @@ extern HS hs[32];
 
 extern WORK* q_hit_push[32];
 extern s8 ca_check_flag;
+extern s16 is_instant_blocked;
 
 void make_red_blocking_time(s16 id, s16 ix, s16 num);
 void hit_check_main_process();

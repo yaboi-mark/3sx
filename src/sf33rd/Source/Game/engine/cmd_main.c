@@ -13,6 +13,7 @@
 #include "sf33rd/Source/Game/engine/pls01.h"
 #include "sf33rd/Source/Game/engine/workuser.h"
 #include "sf33rd/Source/Game/system/sysdir.h"
+#include "stdio.h"
 
 #include <SDL3/SDL.h>
 
@@ -27,6 +28,7 @@ void waza_check(PLW* pl) { // 🟢
     chk_pl = &t_pl_lvr[cmd_id];
     sw_pick_up();
     cmd_move();
+    xrd_cmd_execute(pl);
 }
 
 void key_thru(PLW* pl) { // 🟢
@@ -613,7 +615,9 @@ void paring_miss_init() {
     wcp[cmd_id].waza_flag[waza_type[cmd_id]] = 0;
 }
 
+//parry has something to do with this
 void check_10() {
+    //printf("shot_ok is %d, cmd_id is %1d, now_lvbt is %2d\n", waza_ptr->shot_ok, cmd_id, chk_pl->now_lvbt);
     switch (waza_ptr->shot_ok) {
     case 0:
         if (chk_pl->sw_lever == 0) {
@@ -1864,4 +1868,36 @@ void waza_compel_all_init2(PLW* pl) { // 🟢
 
 u16 processed_lvbt(u16 lv_data) { // 🟡
     return lv_data & 0xFFF;
+}
+
+//i know i could've integrated this much, much more cleanly, but i'm not navigating everything in the above code.
+void xrd_cmd_execute(PLW* pl) {
+    if (pl->cp->xrd_is_instant_blocking == 0) {
+        if ((pl->cp->sw_new & 0x08) && !(pl->cp->sw_new_last & 0x08) && (pl->cp->xrd_instant_block_timer == 0)) {   //starting an instant
+            pl->cp->xrd_instant_block_timer = XRD_INSTANT_BLOCK_WINDOW;
+            pl->cp->xrd_is_instant_blocking = 1;
+        }
+        else if (pl->cp->xrd_instant_block_timer > 0) { //in cooldown
+            pl->cp->xrd_instant_block_timer--;
+        }
+    }
+    else {  //in window
+        pl->cp->xrd_instant_block_timer--;
+        if (pl->cp->xrd_instant_block_timer == 0) { //starting cooldown
+            pl->cp->xrd_is_instant_blocking = 0;
+            pl->cp->xrd_instant_block_timer = XRD_INSTANT_BLOCK_COOLDOWN;
+        }
+    }
+
+    s16 buttons_held_counter = 0;
+    for (s16 i = 16; i <= 1024; i *= 2) {
+        if (pl->cp->sw_new & i) {
+            buttons_held_counter++;
+        }
+    }
+    //printf("current buttons_held_counter is: %d\n", buttons_held_counter);
+    pl->cp->xrd_faultless_defense = buttons_held_counter == 2;
+
+    //KEEP THIS LAST
+    pl->cp->sw_new_last = pl->cp->sw_new;
 }

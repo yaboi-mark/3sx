@@ -1308,9 +1308,6 @@ s32 check_roman_cancel(PLW* wk) {
 }
 
 s32 check_dead_angle(PLW* wk) {
-    //if (wk->player_number == CHAR_KEN) {
-    //    printf("guard_flag is %d\n", wk->wu.dm_stop);
-    //}
 
     s16 ex_drain_amount = use_ex_gauge[omop_use_ex_gauge_ix[wk->wu.id]];
 

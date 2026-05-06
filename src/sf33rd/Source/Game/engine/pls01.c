@@ -362,6 +362,7 @@ s16 check_F_R_dash(PLW* wk) { // 🟢
                 wk->wu.routine_no[3] = 0;
                 rnum = 1;
                 wk->last_dash_dir = 1;
+                add_sp_arts_gauge_small(wk, 350);
             }
 
             if (is_air) {
@@ -637,12 +638,16 @@ s16 check_walking_lv_dir(PLW* wk) { // 🟢
         if (wk->wu.routine_no[2] != 3) {
             rnum = 1;
         }
+        add_sp_arts_gauge_small(wk, 15);
 
         break;
 
     case 2:
         if (wk->wu.routine_no[2] != 4) {
             rnum = 1;
+        }
+        if (wk->cp->xrd_faultless_defense) {
+            add_sp_arts_gauge_small(wk, -20);
         }
 
         break;

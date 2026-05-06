@@ -6,6 +6,7 @@
 #include "sf33rd/Source/Game/engine/plmain.h"
 #include "common.h"
 #include "xrd_common.h"
+#include "stdio.h"
 #include "constants.h"
 #include "sf33rd/Source/Game/animation/appear.h"
 #include "sf33rd/Source/Game/com/com_pl.h"
@@ -359,6 +360,10 @@ s16 check_hit_stop(PLW* wk) { // 🟢
     WORK* emwk = (WORK*)wk->wu.target_adrs;
 
     num = 0;
+
+    if (wk->wu.dm_stop && is_instant_blocked) {
+        add_mvxy_speed_direct(&(wk->wu), 10000, 0); //TODOMP: make it actually affect velocity, not just teleport the player forwards.
+    }
 
     if ((wk->wu.dm_stop != 0) && (wk->wu.hit_stop != 0)) {
         if (wk->wu.routine_no[3]) {

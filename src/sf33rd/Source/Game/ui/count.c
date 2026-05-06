@@ -13,8 +13,8 @@
 #include "sf33rd/Source/Game/system/work_sys.h"
 #include "sf33rd/Source/Game/ui/sc_data.h"
 #include "sf33rd/Source/Game/ui/sc_sub.h"
-
-#define HOJI_COUNTER_MAX 53
+#include "xrd_common.h"
+#include "stdio.h"
 
 s8 round_timer;
 s8 flash_timer;
@@ -24,7 +24,11 @@ s8 math_counter_hi;
 s8 math_counter_low;
 u8 counter_color;
 bool mugen_flag;
-s8 hoji_counter;
+
+//custom xrd time control
+s16 Get_Time_in_Time() {
+    return XRD_TIMER_SPEED + ((100 - Counter_hi) * XRD_TIMER_SLOWDOWN) / 100;
+}
 
 void count_cont_init(u8 type) {
     Counter_hi = save_w[Present_Mode].Time_Limit; // FIXME: use a consistent value in netplay
@@ -38,8 +42,7 @@ void count_cont_init(u8 type) {
         }
     } else {
         mugen_flag = false;
-        hoji_counter = HOJI_COUNTER_MAX;
-        Counter_low = hoji_counter;
+        Counter_low = Get_Time_in_Time();
         round_timer = Counter_hi;
         math_counter_hi = Counter_hi;
         math_counter_hi /= 10;
@@ -107,7 +110,7 @@ void counter_control() {
     }
 
     if (flash_r_num) {
-        if (Counter_hi == 10 && Counter_low == hoji_counter) {
+        if (Counter_hi == 10 && Counter_low == Get_Time_in_Time()) {
             flash_timer = 0;
             counter_flash(1);
         } else if (Counter_hi < 11) {
@@ -115,7 +118,7 @@ void counter_control() {
         } else {
             counter_flash(0);
         }
-    } else if (Counter_hi == 30 && Counter_low == hoji_counter) {
+    } else if (Counter_hi == 30 && Counter_low == Get_Time_in_Time()) {
         flash_r_num = 1;
         flash_timer = 0;
         counter_flash(0);
@@ -131,7 +134,7 @@ void counter_control() {
         return;
     }
 
-    Counter_low = hoji_counter;
+    Counter_low = Get_Time_in_Time();
     Counter_hi -= 1;
 
     if (Counter_hi == 0) {
@@ -194,8 +197,7 @@ void counter_flash(s8 Flash_Num) {
 
 void bcount_cont_init() {
     Counter_hi = 50;
-    hoji_counter = HOJI_COUNTER_MAX;
-    Counter_low = hoji_counter;
+    Counter_low = Get_Time_in_Time();
     round_timer = Counter_hi;
     math_counter_hi = 5;
     math_counter_low = 0;
@@ -223,8 +225,7 @@ void bcounter_control() {
         return;
     }
 
-    hoji_counter = HOJI_COUNTER_MAX;
-    Counter_low = hoji_counter;
+    Counter_low = Get_Time_in_Time();
     Counter_hi -= 1;
     round_timer = Counter_hi;
     math_counter_hi = Counter_hi;

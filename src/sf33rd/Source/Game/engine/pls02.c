@@ -254,6 +254,20 @@ void add_mvxy_speed_direct(WORK* wk, s16 sx, s16 sy) { // 🟢
     wk->xyz[1].cal += ay << 8;
 }
 
+void divide_mvxy_speed(WORK* wk, s16 sx, s16 sy) { // 🟢
+
+    wk->mvxy.a[0].sp /= sx;
+
+    wk->mvxy.a[1].sp /= sy;
+}
+
+void multiply_mvxy_speed(WORK* wk, s16 sx, s16 sy) { // 🟢
+
+    wk->mvxy.a[0].sp *= sx;
+
+    wk->mvxy.a[1].sp *= sy;
+}
+
 void reset_mvxy_data(WORK* wk) { // 🟢
     wk->mvxy.a[0].sp = wk->mvxy.d[0].sp = wk->mvxy.kop[0] = 0;
     wk->mvxy.a[1].sp = wk->mvxy.d[1].sp = wk->mvxy.kop[1] = 0;
@@ -881,6 +895,22 @@ void add_sp_arts_gauge_init(PLW* wk) { // 🟢
     } else if (!(wk->spmv_ng_flag2 & DIP2_WHIFFED_NORMALS_BUILD_SA_GAUGE_DISABLED)) {
         asag = _add_arts_gauge[wk->player_number][wk->wu.add_arts_point][0];
         add_super_arts_gauge(wk->sa, wk->wu.id, asag, wk->metamorphose);
+    }
+}
+
+void add_sp_arts_gauge_small(PLW* wk, s16 amount) { // this is done in percentage of one tick of super
+    wk->sa->sub_sa += amount;
+    if (amount > 0) {
+        while (wk->sa->sub_sa >= 100) { //we do this in case a value greater than 100 is punched in
+            add_super_arts_gauge(wk->sa, wk->wu.id, 1, wk->metamorphose);
+            wk->sa->sub_sa -= 100;
+        }
+    }
+    else {
+        while (wk->sa->sub_sa < 0) { //we do this in case a negative value is punched in
+            add_super_arts_gauge(wk->sa, wk->wu.id, -1, wk->metamorphose);
+            wk->sa->sub_sa += 100;
+        }
     }
 }
 

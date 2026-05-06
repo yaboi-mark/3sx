@@ -24,7 +24,6 @@ typedef struct GameState {
     s8 math_counter_low;
     u8 counter_color;
     bool mugen_flag;
-    s8 hoji_counter;
 
     u8 Order[148];
     u8 Order_Timer[148];

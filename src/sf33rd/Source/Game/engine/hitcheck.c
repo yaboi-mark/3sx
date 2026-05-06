@@ -25,6 +25,7 @@
 #include "sf33rd/Source/Game/engine/workuser.h"
 #include "sf33rd/Source/Game/io/pulpul.h"
 #include "sf33rd/Source/Game/system/sysdir.h"
+#include "stdio.h"
 
 #include <SDL3/SDL.h>
 
@@ -36,6 +37,7 @@ WORK* q_hit_push[32];
 s16 mkm_wk[32];
 s16 hpq_in;
 s8 ca_check_flag;
+s16 is_instant_blocked;
 
 void make_red_blocking_time(s16 id, s16 ix, s16 num) {
     switch (ix) {
@@ -481,6 +483,7 @@ void plef_at_vs_player_damage_union(PLW* as, PLW* ds, s8 gddir) {
         case 1:
             goto set_guard_status;
         }
+        is_instant_blocked = 0;
 
     jump_one:
         as->wu.hf.hit.player = 2;
@@ -501,6 +504,7 @@ void plef_at_vs_player_damage_union(PLW* as, PLW* ds, s8 gddir) {
         case 1:
             goto set_guard_status;
         }
+        is_instant_blocked = 0;
 
     jump_two:
         as->wu.hf.hit.player = 1;
@@ -609,9 +613,22 @@ void set_guard_status(PLW* as, PLW* ds) {
 
         ds->wu.dm_piyo = 0;
         as->wu.cmwk[8]++;
-        add_sp_arts_gauge_guard(as);
+        if (ds->cp->xrd_faultless_defense) {
+            add_sp_arts_gauge_small(ds, -100 - ds->wu.dm_vital);
+        }
+        if (is_instant_blocked) {
+            add_sp_arts_gauge_hit_dm(as);
+            add_sp_arts_gauge_guard(ds);
+            //i should find a way to do this twice.
+            //i won't, because i don't actually care for grade.
+            grade_add_guard_success(ds->wu.id);
+            grade_add_guard_success(ds->wu.id);
+        }
+        else {
+            add_sp_arts_gauge_guard(as);
+            grade_add_guard_success(ds->wu.id);
+        }
         ds->wu.dm_arts_point = 0;
-        grade_add_guard_success(ds->wu.id);
     }
 
     hit_pattern_extdat_check(&as->wu);
@@ -1088,7 +1105,7 @@ s32 defense_sky(PLW* as, PLW* ds, s8 gddir) {
     as->wu.hf.hit.player = 0x20;
     ds->wu.routine_no[2] = 7;
 
-    if (check_dm_att_guard(&as->wu, &ds->wu, 2)) {
+    if (check_dm_att_guard(&as->wu, &ds->wu, 1)) {
         return 2;
     }
 
@@ -1111,11 +1128,18 @@ void blocking_point_count_up(PLW* wk) {
     }
 }
 
+// returning a 0 is a parry, a 1 is a block, a 2 is a hit
 s32 defense_ground(PLW* as, PLW* ds, s8 gddir) {
     s8 just_now;
     s8 attr_att;
     s8 abs;
     s8 ags;
+
+    is_instant_blocked = 0;
+    if (ds->cp->xrd_is_instant_blocking) {
+        ds->cp->xrd_instant_block_timer = XRD_INSTANT_BLOCK_WINDOW;
+        is_instant_blocked = 1;
+    }
 
     abs = (ds->spmv_ng_flag & DIP_AUTO_PARRY_DISABLED) == 0;
     ags = (ds->spmv_ng_flag & DIP_AUTO_GUARD_DISABLED) == 0;
@@ -1343,6 +1367,12 @@ void dm_status_copy(WORK* as, WORK* ds) {
     ds->dm_kind_of_waza = as->kind_of_waza;
     ds->dm_nodeathattack = as->no_death_attack;
     ds->dm_jump_att_flag = as->jump_att_flag;
+
+    if (is_instant_blocked) {
+        ds->dm_stop = (ds->dm_stop * XRD_INSTANT_BLOCK_FRAME_NUMERATOR) / XRD_INSTANT_BLOCK_FRAME_DENOMENATOR;
+        ds->hit_stop = (ds->hit_stop * XRD_INSTANT_BLOCK_FRAME_NUMERATOR) / XRD_INSTANT_BLOCK_FRAME_DENOMENATOR;
+        ds->dm_impact = 0;
+    }
 
     if (ds->dm_quake < 0) {
         ds->dm_quake = -ds->dm_quake;

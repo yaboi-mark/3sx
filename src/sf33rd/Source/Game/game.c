@@ -107,11 +107,6 @@ static void Set_Appear_Type_For_Mode() {
     appear_type = Is_Training_Mode(Mode_Type) ? APPEAR_TYPE_NON_ANIMATED : APPEAR_TYPE_ANIMATED;
 }
 
-//custom xrd time control
-s16 Get_Time_in_Time() {
-    return XRD_TIMER_SPEED + (Control_Time * XRD_TIMER_SLOWDOWN) / 100;
-}
-
 void Game_Task(struct _TASK* task_ptr) {
     s16 ix;
     s16 ff;
@@ -498,7 +493,7 @@ void Game2_0() {
     }
 
     Allow_a_battle_f = 0;
-    Time_in_Time = Get_Time_in_Time();
+    Time_in_Time = 60;
     init_slow_flag();
     clear_hit_queue();
     pcon_rno[0] = pcon_rno[1] = pcon_rno[2] = pcon_rno[3] = 0;
@@ -588,7 +583,7 @@ void Game2_2() {
     }
 
     Allow_a_battle_f = 0;
-    Time_in_Time = Get_Time_in_Time();
+    Time_in_Time = 60;
     init_slow_flag();
     effect_work_quick_init();
     clear_hit_queue();
@@ -1305,7 +1300,7 @@ void Game09() {
         G_Timer = 19;
         Round_num = 0;
         Allow_a_battle_f = 0;
-        Time_in_Time = Get_Time_in_Time();
+        Time_in_Time = 60;
         init_slow_flag();
         clear_hit_queue();
         pcon_rno[0] = pcon_rno[1] = pcon_rno[2] = pcon_rno[3] = 0;
@@ -1785,7 +1780,7 @@ void Time_Control() {
     if (Control_Time >= Limit_Time) {
         Control_Time = Limit_Time;
     } else if (--Time_in_Time == 0) {
-        Time_in_Time = Get_Time_in_Time();
+        Time_in_Time = 60;
         Control_Time += 1;
     }
 }
@@ -1864,7 +1859,7 @@ void Before_Select_Sub() {
     grade_check_work_1st_init(1, 1);
     Last_Player_id = Player_Number = -1;
     Round_Level = 3;
-    Time_in_Time = Get_Time_in_Time();
+    Time_in_Time = 60;
 
     if (Mode_Type != MODE_NETWORK) {
         xx = system_timer;

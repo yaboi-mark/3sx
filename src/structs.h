@@ -3,6 +3,7 @@
 
 #include "sf33rd/AcrSDK/common/plcommon.h"
 #include "types.h"
+#include "xrd_common.h"
 
 #include <stdbool.h>
 
@@ -475,6 +476,7 @@ typedef struct {
     u8 ex4th_exec;
     s16 total_gauge;
     s16 bacckup_g_h;
+    s16 sub_sa;
 } SA_WORK;
 
 typedef struct {
@@ -497,6 +499,10 @@ typedef struct {
     u8 waza_r[56][4];
     u16 btix[56];
     u16 exdt[56][4];
+    u16 xrd_instant_block_timer;
+    u16 xrd_is_instant_blocking;
+    u16 sw_new_last;
+    u16 xrd_faultless_defense;
 } WORK_CP;
 
 typedef struct {

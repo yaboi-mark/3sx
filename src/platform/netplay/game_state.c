@@ -30,7 +30,6 @@ void GameState_Save(GameState* dst) {
     GS_SAVE(math_counter_low);
     GS_SAVE(counter_color);
     GS_SAVE(mugen_flag);
-    GS_SAVE(hoji_counter);
     GS_SAVE(Order);
     GS_SAVE(Order_Timer);
     GS_SAVE(Order_Dir);
@@ -655,7 +654,6 @@ void GameState_Load(const GameState* src) {
     GS_LOAD(math_counter_low);
     GS_LOAD(counter_color);
     GS_LOAD(mugen_flag);
-    GS_LOAD(hoji_counter);
     GS_LOAD(Order);
     GS_LOAD(Order_Timer);
     GS_LOAD(Order_Dir);
